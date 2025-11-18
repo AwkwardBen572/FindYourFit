@@ -2,6 +2,7 @@
   <profile v-if="currentPage === 'profile'"></profile>
   <home v-else-if="currentPage === 'home'" @setPage="setPage"></home>
   <mood v-else-if="currentPage === 'mood'"></mood>
+  <journal-entry v-else-if="currentPage === 'journal'"></journal-entry>
 
   <div class="navigation_bar_holder">
     <div
@@ -27,6 +28,7 @@ import { useUserStore } from '@/data/userStore'
 import Profile from '../profile/profile.vue'
 import Home from '../home/home.vue'
 import Mood from '../mood/mood.vue'
+import JournalEntry from '../journal/journal.vue'
 import { useRouter } from 'vue-router'
 
 const navigationItems = {

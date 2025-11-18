@@ -50,9 +50,7 @@ onMounted(async () => {
   
   for(const mood in moods.value) {
     if(moods.value[mood].ref == userStore.moodData[todaysDate].mood) {
-      console.log(moods.value[mood].ref, userStore.moodData[todaysDate].mood)
       stats.value[2].value = moods.value[mood].icon
-      console.log(stats.value[2].value)
     }
   }
 })

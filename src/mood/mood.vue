@@ -111,6 +111,8 @@ const saveMood = async () => {
 const handleErrorModalClose = () => {
     moodSaved.value = false
     modalMessage.value = ''
+
+    window.location.reload()
 }
 
 </script>

@@ -3,6 +3,7 @@ import LoginPage from '../login_register/loginRegister.vue'
 import HomePage from '../home/home.vue'
 import LoadingPage from '../loading/loadingPage.vue'
 import ProfilePage from '../profile/profile.vue'
+import JournalEntryPage from '../journal/journal.vue'
 import NavigationWidget from '../navigation/navigation.vue'
 
 const routes = [
@@ -31,6 +32,12 @@ const routes = [
     path: '/profile/',
     name: 'Profile',
     component: ProfilePage,
+    props: true
+  },
+  {
+    path: '/journal/',
+    name: 'JournalEntry',
+    component: JournalEntryPage,
     props: true
   }
 ]
