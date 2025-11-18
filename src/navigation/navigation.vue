@@ -1,0 +1,97 @@
+<template>
+  <profile v-if="currentPage === 'profile'"></profile>
+  <home v-else-if="currentPage === 'home'" @setPage="setPage"></home>
+  <mood v-else-if="currentPage === 'mood'"></mood>
+
+  <div class="navigation_bar_holder">
+    <div
+      class="navigation_item_holder inter font_size_xxs"
+      v-for="(item, key) in navigationItems"
+      :key="key"
+    >
+      <div
+        class="navigation_item"
+        :class="{ active: currentPage === key }"
+        @click="setPage(key)"
+      >
+        <div v-html="item.icon"></div>
+        <div>{{ item.name }}</div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, watch } from 'vue'
+import { useUserStore } from '@/data/userStore'
+import Profile from '../profile/profile.vue'
+import Home from '../home/home.vue'
+import Mood from '../mood/mood.vue'
+import { useRouter } from 'vue-router'
+
+const navigationItems = {
+  home: { name: 'Home', icon: '<i class="fa fa-home"></i>' },
+  therapists: { name: 'Therapists', icon: '<i class="fa fa-address-book"></i>' },
+  journal: { name: 'Journal', icon: '<i class="fa fa-book"></i>' },
+  content: { name: 'Content', icon: '<i class="fa fa-folder-open"></i>' },
+  profile: { name: 'Profile', icon: '<i class="fa fa-id-card"></i>' }
+}
+
+const userStore = useUserStore()
+
+watch(() => userStore.userData, (newVal) => {
+  if (newVal) {
+  }
+})
+
+const router = useRouter()
+const currentPage = ref('home')
+
+const setPage = (page) => {
+  currentPage.value = page
+}
+
+onMounted(async () => {
+ 
+})
+
+</script>
+
+<style scoped>
+.navigation_bar_holder {
+  width: 100%;
+  height: 4rem;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  box-shadow: 0 -5px 20px -5px #87bfba;
+  display: flex;
+  justify-content: space-around;
+  background-color: #ffffff;
+}
+
+.navigation_item_holder {
+  width: 23%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.navigation_item {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #87bfba;
+  transition: all 0.2s ease;
+}
+
+.navigation_item.active {
+  color: #ffffff;
+  background-color: #87bfba;
+  border-radius: 0.5rem;
+}
+
+</style>
