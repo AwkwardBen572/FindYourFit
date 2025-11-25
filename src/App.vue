@@ -1,16 +1,17 @@
 <script setup>
 
-import { onMounted, computed  } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/data/userStore'
+// import { onMounted, computed  } from 'vue'
+// import { useRouter } from 'vue-router'
+// import { useUserStore } from '@/data/userStore'
 
-const router = useRouter()
+// const router = useRouter()
+// const userStore = useUserStore()
 
-onMounted(async () => {
-  const userFetched = useUserStore()
-  await userFetched.fetchUserData()
-  router.replace('/loading')
-})
+// onMounted(async () => {
+//   const userFetched = useUserStore()
+//   await userFetched.fetchUserData()
+//   router.replace('/loading')
+// })
 
 </script>
 

@@ -93,26 +93,28 @@ const saveMood = async () => {
 
     const dateSaved = new Date().toISOString().split('T')[0]
 
-    await setDoc(doc(db, "mood", userStore.userData.uid), {
+    const mood = {
         [dateSaved]: {
             mood: selectedMood.value,
             influences: selectedInfluences.value,
             optional_notes: optionalNotes.value,
             mood_logged: serverTimestamp()
         }
-    },
-        { merge: true })
+    }
+
+    await setDoc(doc(db, "mood", userStore.userData.uid), mood,
+    { merge: true })
 
     moodSaved.value = true
     modalMessage.value = 'Thank you for logging your mood. It will be taken into consideration.'
+
+    userStore.setMoodData(mood)
     emit('close')
 }
 
 const handleErrorModalClose = () => {
     moodSaved.value = false
     modalMessage.value = ''
-
-    window.location.reload()
 }
 
 </script>

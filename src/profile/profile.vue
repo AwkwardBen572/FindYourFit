@@ -11,7 +11,7 @@
     <div class="profile_info">
       <div class="profile_avatar_wrapper">
         <!-- <img :src="userPfp" class="profile_avatar" /> -->
-         <i class='fas fa-user-circle' style='font-size:5rem;color:#87bfba'></i>
+        <i class='fas fa-user-circle' style='font-size:5rem;color:#87bfba'></i>
       </div>
       <div class="profile_user_details font_size_s inter">
         {{ userName }}
@@ -22,7 +22,16 @@
     <div class="profile_stats">
       <div class="profile_stat_card" v-for="(item, index) in stats" :key="index">
         <div class="profile_stat_top inter font_size_xs">
-          <div class="profile_stat_value" v-if="item.label == 'Mood Trends'"><i :class="item.value" style="font-size:1.5rem;"></i>&nbsp;</div>
+          <div class="profile_stat_value" v-if="item.label == 'Mood Trends'">
+            <div v-if="mood">
+              <i :class="item.value"
+              style="font-size:1.5rem;"></i>&nbsp;
+            </div>
+            <div v-else>
+              <i class="far fa-meh"
+              style="font-size:1.5rem;"></i>&nbsp;
+            </div>
+          </div>
           <div class="profile_stat_value" v-else>{{ item.value }}</div>
           <div class="profile_stat_icon">
             <i :class="item.icon" :style="{ color: '#87bfba' }"></i>
@@ -34,7 +43,8 @@
       </div>
     </div>
   </div>
-    <profileEdit v-if="editProfileBool" @close="editProfileBool = false" :globalUser="userStore" :viewPoint="profileEdit"/>
+  <profileEdit v-if="editProfileBool" @close="editProfileBool = false" :globalUser="userStore"
+    :viewPoint="profileEdit" />
 </template>
 
 <script setup>
@@ -43,24 +53,36 @@ import { useUserStore } from '@/data/userStore'
 import profileEdit from '../profile/profileEdit.vue'
 
 const userStore = useUserStore()
+const mood = ref(false)
 
-onMounted(async () => {
+onMounted(() => {
   const todaysDate = new Date().toISOString().split('T')[0]
   globalUser.value = userStore.userData
-  
-  for(const mood in moods.value) {
-    if(moods.value[mood].ref == userStore.moodData[todaysDate].mood) {
-      stats.value[2].value = moods.value[mood].icon
+
+  if (!userStore.moodData || !userStore.moodData[todaysDate]) {
+    return
+  }
+
+  mood.value = true
+
+  const todayMood = userStore.moodData[todaysDate]
+
+  for (const mood of moods.value) {
+    if (mood.ref === todayMood.mood) {
+      stats.value[2].value = mood.icon
+      break
     }
   }
 })
 
+
+
 const moods = computed(() => [
-    { label: 'Very Sad', ref: 'very_sad', icon: 'far fa-sad-tear' },
-    { label: 'Sad', ref: 'sad', icon: 'far fa-frown' },
-    { label: 'Neutral', ref: 'neutral', icon: 'far fa-meh' },
-    { label: 'Happy', ref: 'happy', icon: 'far fa-grin' },
-    { label: 'Very Happy', ref: 'very_happy', icon: 'far fa-grin-beam' }
+  { label: 'Very Sad', ref: 'very_sad', icon: 'far fa-sad-tear' },
+  { label: 'Sad', ref: 'sad', icon: 'far fa-frown' },
+  { label: 'Neutral', ref: 'neutral', icon: 'far fa-meh' },
+  { label: 'Happy', ref: 'happy', icon: 'far fa-grin' },
+  { label: 'Very Happy', ref: 'very_happy', icon: 'far fa-grin-beam' }
 ])
 const userMood = ref()
 const globalUser = ref(null)

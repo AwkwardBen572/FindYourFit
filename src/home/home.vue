@@ -132,6 +132,7 @@ const offerList = computed(() => [
 ])
 
 onMounted(() => {
+  console.log("Home mounted")
   dailyQuote.value = getRandomQuote()
 })
 

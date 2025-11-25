@@ -26,7 +26,8 @@
                 class="inter font_size_xs" v-model="journalEntryContent"></textarea>
         </div>
         <br>
-        <div class="save_button inter font_size_xxs" @click="saveMood()">Save</div>
+        <div class="save_button inter font_size_xxs" @click="saveJournal()">Save</div>
+        <errorModal v-if="journalSaved" :errorMessage="journalMessage" @close="handleErrorModalClose" />
 
     </div>
 </template>
@@ -34,6 +35,15 @@
 <script setup>
 
 import { ref, onMounted, watch, computed } from 'vue'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '@/firebase'
+import { useUserStore } from '@/data/userStore'
+import errorModal from '../modals/errorModal.vue'
+
+const emit = defineEmits(['close'])
+
+
+const userStore = useUserStore()
 
 const selectedJournalItem = ref('journalEntry')
 const journalItems = [
@@ -49,8 +59,47 @@ const setJournalItem = (item) => {
     journalEntryTime.value = ref(new Date().toLocaleTimeString())
 }
 
+const handleErrorModalClose = () => {
+    journalSaved.value = false
+    journalMessage.value = ''
+}
+
 const journalEntryHeading = ref('')
 const journalEntryContent = ref('')
+const journalSaved = ref(false)
+const journalMessage = ref('')
+
+const saveJournal = async () => {
+    if (!journalEntryHeading.value) {
+        journalSaved.value = true
+        journalMessage.value = 'Please give a journal title.'
+        return
+    }
+
+    if (!journalEntryContent.value) {
+        journalSaved.value = true
+        journalMessage.value = 'Please give journal content.'
+        return
+    }
+
+    const dateSaved = new Date.now()
+
+    const journalEntry = {
+        [dateSaved]: {
+            journalEntryHeading: journalEntryHeading.value,
+            journalEntryContent: journalEntryContent.value,
+            journalEntryLogged: serverTimestamp()
+        }
+    }
+
+    await setDoc(doc(db, "journals", userStore.userData.uid), journalEntry,
+    { merge: true })
+
+    journalSaved.value = true
+    journalMessage.value = 'You journal entry has been logged.'
+
+    emit('close')
+}
 
 </script>
 

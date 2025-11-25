@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/data/userStore'
 import LoginPage from '../login_register/loginRegister.vue'
 import HomePage from '../home/home.vue'
 import LoadingPage from '../loading/loadingPage.vue'
@@ -45,6 +46,20 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore()
+
+  if (!userStore.userData) {
+    await userStore.fetchUserData()
+  }
+
+  if (!userStore.userData?.uid && to.name !== 'Login') {
+    return next({ name: 'Login' })
+  }
+
+  next()
 })
 
 export default router
