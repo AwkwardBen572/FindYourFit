@@ -30,11 +30,19 @@
         <errorModal v-if="journalSaved" :errorMessage="journalMessage" @close="handleErrorModalClose" />
 
     </div>
+    <div v-else>
+        <div class="journal_list_holder" v-if="userStore.journalData">
+            <div v-for="(entry, date) in userStore.journalData" :key="date" style="width: 90%; box-shadow: 0.1rem 0.1rem 1rem 0.2rem rgba(135, 191, 186, 0.4);; margin-bottom: 1rem; border-radius: 1rem; padding: 0.5rem;">
+                <div class="inter font_size_sm" style="font-weight: bold; margin-bottom: 0.5rem;">{{ entry.journalEntryHeading }}</div>
+                <div class="inter font_size_xs" style="margin-bottom: 0.5rem;">{{ entry.journalEntryContent }}</div>
+                <div class="inter font_size_xxs" style="color: #808080;">Logged on: {{ new Date(entry.journalEntryLogged.seconds * 1000).toLocaleString() }}</div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
-
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref } from 'vue'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { useUserStore } from '@/data/userStore'
@@ -42,26 +50,25 @@ import errorModal from '../modals/errorModal.vue'
 
 const emit = defineEmits(['close'])
 
-
 const userStore = useUserStore()
-
 const selectedJournalItem = ref('journalEntry')
 const journalItems = [
   { key: 'journalEntry', label: 'New Journal Entry', cornerClass: 'right-rounded' },
   { key: 'journalList', label: 'Journal List', cornerClass: 'left-rounded' }
 ]
+
 const journalEntryDate = ref(new Date().toDateString())
 const journalEntryTime = ref(new Date().toLocaleTimeString())
 
 const setJournalItem = (item) => {
-    selectedJournalItem.value = item
-    journalEntryDate.value = ref(new Date().toDateString())
-    journalEntryTime.value = ref(new Date().toLocaleTimeString())
+  selectedJournalItem.value = item
+  journalEntryDate.value = new Date().toDateString()
+  journalEntryTime.value = new Date().toLocaleTimeString()
 }
 
 const handleErrorModalClose = () => {
-    journalSaved.value = false
-    journalMessage.value = ''
+  journalSaved.value = false
+  journalMessage.value = ''
 }
 
 const journalEntryHeading = ref('')
@@ -70,37 +77,46 @@ const journalSaved = ref(false)
 const journalMessage = ref('')
 
 const saveJournal = async () => {
-    if (!journalEntryHeading.value) {
-        journalSaved.value = true
-        journalMessage.value = 'Please give a journal title.'
-        return
+  if (!journalEntryHeading.value) {
+    journalSaved.value = true
+    journalMessage.value = 'Please give a journal title.'
+    return
+  }
+
+  if (!journalEntryContent.value) {
+    journalSaved.value = true
+    journalMessage.value = 'Please give journal content.'
+    return
+  }
+
+  const dateSaved = Date.now()
+
+  const journalEntry = {
+    [dateSaved]: {
+      journalEntryHeading: journalEntryHeading.value,
+      journalEntryContent: journalEntryContent.value,
+      journalEntryLogged: serverTimestamp()
     }
+  }
 
-    if (!journalEntryContent.value) {
-        journalSaved.value = true
-        journalMessage.value = 'Please give journal content.'
-        return
-    }
-
-    const dateSaved = new Date.now()
-
-    const journalEntry = {
-        [dateSaved]: {
-            journalEntryHeading: journalEntryHeading.value,
-            journalEntryContent: journalEntryContent.value,
-            journalEntryLogged: serverTimestamp()
-        }
-    }
-
-    await setDoc(doc(db, "journals", userStore.userData.uid), journalEntry,
-    { merge: true })
+  try {
+    await setDoc(doc(db, 'journals', userStore.userData.uid), journalEntry, { merge: true })
 
     journalSaved.value = true
-    journalMessage.value = 'You journal entry has been logged.'
+    journalMessage.value = 'Your journal entry has been logged.'
+
+    journalEntryHeading.value = ''
+    journalEntryContent.value = ''
+    journalEntryDate.value = new Date().toDateString()
+    journalEntryTime.value = new Date().toLocaleTimeString()
 
     emit('close')
+  } catch (err) {
+    console.error('Failed to save journal:', err)
+    journalSaved.value = true
+    journalMessage.value = 'Failed to save journal. Please try again.'
+  }
 }
-
 </script>
 
 <style scoped>
@@ -192,6 +208,14 @@ const saveJournal = async () => {
     color: #ffffff;
     cursor: pointer;
     margin-bottom: 5rem;
+}
+
+.journal_list_holder {
+    margin-top: 2rem;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
 }
 
 </style>

@@ -9,7 +9,7 @@ import NavigationWidget from '../navigation/navigation.vue'
 
 const routes = [
   {
-    path: '/loading',
+    path: '/',
     name: 'Loading',
     component: LoadingPage
   }

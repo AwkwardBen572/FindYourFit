@@ -1,8 +1,7 @@
 <template>
   <div class="profile_container">
     <div class="profile_header">
-      <div class="profile_title font_size_s inter">
-      </div>
+      <div class="profile_title font_size_s inter"></div>
       <div class="profile_edit_btn">
         <i class="fas fa-edit" @click="editProfile()"></i>
       </div>
@@ -10,8 +9,19 @@
 
     <div class="profile_info">
       <div class="profile_avatar_wrapper">
-        <!-- <img :src="userPfp" class="profile_avatar" /> -->
-        <i class='fas fa-user-circle' style='font-size:5rem;color:#87bfba'></i>
+        <!-- <i class='fas fa-user-circle' style='font-size:5rem;color:#87bfba'></i> -->
+        <div class="profile_avatar" :style="{
+          backgroundImage: `url(${avatarSrc})`,
+          backgroundSize: '100% 100%',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat'
+        }">
+
+        </div>
+      </div>
+      <div class="pfp_edit_button">
+        <i class="fas fa-edit" @click="editProfileAvatar()"></i>
+        <input type="file" ref="fileInput" style="display:none" accept="image/*" @change="handleImageUpload" />
       </div>
       <div class="profile_user_details font_size_s inter">
         {{ userName }}
@@ -24,12 +34,10 @@
         <div class="profile_stat_top inter font_size_xs">
           <div class="profile_stat_value" v-if="item.label == 'Mood Trends'">
             <div v-if="mood">
-              <i :class="item.value"
-              style="font-size:1.5rem;"></i>&nbsp;
+              <i :class="item.value" style="font-size:1.5rem;"></i>&nbsp;
             </div>
             <div v-else>
-              <i class="far fa-meh"
-              style="font-size:1.5rem;"></i>&nbsp;
+              <i class="far fa-meh" style="font-size:1.5rem;"></i>&nbsp;
             </div>
           </div>
           <div class="profile_stat_value" v-else>{{ item.value }}</div>
@@ -37,45 +45,74 @@
             <i :class="item.icon" :style="{ color: '#87bfba' }"></i>
           </div>
         </div>
-        <div class="profile_stat_label inter font_size_xs">
-          {{ item.label }}
-        </div>
+        <div class="profile_stat_label inter font_size_xs">{{ item.label }}</div>
       </div>
     </div>
   </div>
+
   <profileEdit v-if="editProfileBool" @close="editProfileBool = false" :globalUser="userStore"
     :viewPoint="profileEdit" />
+
+  <profileAvatar v-if="avatarProfileBool" @close="avatarProfileBool = false" :globalUser="userStore"
+    :viewPoint="profileAvatar" />
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useUserStore } from '@/data/userStore'
 import profileEdit from '../profile/profileEdit.vue'
+import profileAvatar from '../profile/profileAvatar.vue'
+import { doc, updateDoc } from "firebase/firestore"
+import brownMan from '@/assets/avatars/brown_man.png'
+import blondeMan from '@/assets/avatars/blonde_man.png'
+import gingerMan from '@/assets/avatars/ginger_man.png'
+import blackMan from '@/assets/avatars/black_man.png'
+import blackWoman from '@/assets/avatars/black_woman.png'
+import brownWoman from '@/assets/avatars/brunette_woman.png'
+import gingerWoman from '@/assets/avatars/ginger_woman.png'
+import blondeWoman from '@/assets/avatars/blonde_woman.png'
+import none from '@/assets/avatars/none.png'
 
 const userStore = useUserStore()
 const mood = ref(false)
+const editProfileBool = ref(false)
+const avatarProfileBool = ref(false)
+const globalUser = ref(null)
+const avatar = computed(() => userStore.userData.profileAvatar ? userStore.userData.profileAvatar : 'none')
+
+const avatarMap = {
+  brown_man: brownMan,
+  blonde_man: blondeMan,
+  ginger_man: gingerMan,
+  black_man: blackMan,
+  brown_woman: brownWoman,
+  blonde_woman: blondeWoman,
+  ginger_woman: gingerWoman,
+  black_woman: blackWoman,
+  none: none
+}
+
+const avatarSrc = computed(() => {
+  const ref = userStore.userData?.profileAvatar || 'none'
+  return avatarMap[ref] || none
+})
 
 onMounted(() => {
   const todaysDate = new Date().toISOString().split('T')[0]
   globalUser.value = userStore.userData
 
-  if (!userStore.moodData || !userStore.moodData[todaysDate]) {
-    return
-  }
+  if (!userStore.moodData || !userStore.moodData[todaysDate]) return
 
   mood.value = true
-
   const todayMood = userStore.moodData[todaysDate]
 
-  for (const mood of moods.value) {
-    if (mood.ref === todayMood.mood) {
-      stats.value[2].value = mood.icon
+  for (const moodOption of moods.value) {
+    if (moodOption.ref === todayMood.mood) {
+      stats.value[2].value = moodOption.icon
       break
     }
   }
 })
-
-
 
 const moods = computed(() => [
   { label: 'Very Sad', ref: 'very_sad', icon: 'far fa-sad-tear' },
@@ -84,15 +121,13 @@ const moods = computed(() => [
   { label: 'Happy', ref: 'happy', icon: 'far fa-grin' },
   { label: 'Very Happy', ref: 'very_happy', icon: 'far fa-grin-beam' }
 ])
-const userMood = ref()
-const globalUser = ref(null)
+
 const userName = computed(() => userStore.userData?.personalInfo.name || '')
 const userEmail = computed(() => userStore.userData?.personalInfo.email || '')
-const userPfp = ref('../../src/assets/user.png')
 const userStreak = computed(() => userStore.userData?.streak?.count || 0)
-const journalEntries = computed(() => userStore.userData?.personalInfo.journalEntries?.length || 0)
+const journalEntries = computed(() => userStore.journalData.length || 0)
 const courseAmounts = computed(() => userStore.userData?.personalInfo.courses?.length || 0)
-const editProfileBool = ref(false)
+
 const stats = ref([
   { label: 'App Streak', value: userStreak.value, icon: 'fa fa-signal' },
   { label: 'Journal Entries', value: journalEntries.value, icon: 'fa fa-book' },
@@ -100,9 +135,8 @@ const stats = ref([
   { label: 'Courses', value: courseAmounts.value, icon: 'fas fa-book-open' }
 ])
 
-const editProfile = () => {
-  editProfileBool.value = true
-}
+const editProfile = () => { editProfileBool.value = true }
+const editProfileAvatar = () => { avatarProfileBool.value = true }
 </script>
 
 <style scoped>
@@ -145,16 +179,29 @@ const editProfile = () => {
   height: clamp(6rem, 20vw, 9rem);
   border-radius: 50%;
   border: 0.15rem solid #87bfba;
+  background-color: #87bfba;
   display: flex;
+  flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
   overflow: hidden;
 }
 
+.pfp_edit_button {
+  width: 7rem;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-end;
+  color: #87bfba;
+}
+
 .profile_avatar {
-  width: 80%;
-  height: 80%;
-  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
   border-radius: 50%;
 }
 

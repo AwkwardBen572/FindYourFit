@@ -5,7 +5,8 @@ import { db, auth } from '@/firebase'
 export const useUserStore = defineStore('user', {
   state: () => ({
     userData: null,
-    moodData: null
+    moodData: null,
+    journalData: null
   }),
 
   actions: {
@@ -30,17 +31,16 @@ export const useUserStore = defineStore('user', {
         await this.updateStreak()
 
         await this.getMood()
+
+        await this.getJournalEntries()
       }
     },
-
     setUserData(user) {
       this.userData = user
     },
-
     setMoodData(mood) {
       this.moodData = mood
     },
-
     async updateStreak() {
       const user = auth.currentUser
       if (!user || !this.userData?.streak) return
@@ -59,26 +59,21 @@ export const useUserStore = defineStore('user', {
 
       const lastDate = lastUpdate.toDate()
       const now = new Date()
-
       if (this.isSameDay(lastDate, now)) {
         return
       }
-
       if (this.isYesterday(lastDate, now)) {
         this.userData.streak.count = count + 1
       } else {
         this.userData.streak.count = 1
       }
-
       this.userData.streak.lastUpdate = serverTimestamp()
-
       await setDoc(
         doc(db, "users", user.uid),
         this.userData,
         { merge: true }
       )
     },
-
     isSameDay(a, b) {
       return (
         a.getUTCFullYear() === b.getUTCFullYear() &&
@@ -86,7 +81,6 @@ export const useUserStore = defineStore('user', {
         a.getUTCDate() === b.getUTCDate()
       )
     },
-
     isYesterday(timestamp) {
       const date = timestamp
       const now = new Date()
@@ -98,7 +92,6 @@ export const useUserStore = defineStore('user', {
 
       return diffDays === 1
     },
-
     async getMood() {
       const user = auth.currentUser
       if (!user) return
@@ -109,6 +102,24 @@ export const useUserStore = defineStore('user', {
       if (docSnap.exists()) {
         this.moodData = docSnap.data()
       }
+    },
+    async getJournalEntries() {
+      const user = auth.currentUser
+      if (!user) return
+
+      const docRef = doc(db, 'journals', user.uid)
+      const docSnap = await getDoc(docRef)
+
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+
+        const sorted = Object.entries(data)
+          .sort((a, b) => Number(b[0]) - Number(a[0]))
+          .map(([key, value]) => ({ id: key, ...value }))
+
+        this.journalData = sorted
+      }
+
     }
   }
 })
