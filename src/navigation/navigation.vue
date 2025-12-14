@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useUserStore } from '@/data/userStore'
 import Profile from '../profile/profile.vue'
 import Home from '../home/home.vue'
@@ -35,19 +35,11 @@ import { useRouter } from 'vue-router'
 
 const navigationItems = {
   home: { name: 'Home', icon: '<i class="fa fa-home"></i>' },
-  therapists: { name: 'Therapists', icon: '<i class="fa fa-address-book"></i>' },
   journal: { name: 'Journal', icon: '<i class="fa fa-book"></i>' },
-  content: { name: 'Content', icon: '<i class="fa fa-folder-open"></i>' },
   profile: { name: 'Profile', icon: '<i class="fa fa-id-card"></i>' }
 }
 
 const userStore = useUserStore()
-
-watch(() => userStore.userData, (newVal) => {
-  if (newVal) {
-  }
-})
-
 const router = useRouter()
 const currentPage = ref('home')
 
@@ -55,10 +47,15 @@ const setPage = (page) => {
   currentPage.value = page
 }
 
-onMounted(async () => {
- 
+watch(() => userStore.userData, (newVal) => {
+  if (newVal) {
+    // You can add logic here if needed
+  }
 })
 
+onMounted(() => {
+  // Any initialization logic if needed
+})
 </script>
 
 <style scoped>
@@ -97,5 +94,4 @@ onMounted(async () => {
   background-color: #87bfba;
   border-radius: 0.5rem;
 }
-
 </style>

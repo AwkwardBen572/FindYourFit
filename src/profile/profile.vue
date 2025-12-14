@@ -9,20 +9,25 @@
 
     <div class="profile_info">
       <div class="profile_avatar_wrapper">
-        <!-- <i class='fas fa-user-circle' style='font-size:5rem;color:#87bfba'></i> -->
         <div class="profile_avatar" :style="{
           backgroundImage: `url(${avatarSrc})`,
           backgroundSize: '100% 100%',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat'
-        }">
-
-        </div>
+        }"></div>
       </div>
+
       <div class="pfp_edit_button">
         <i class="fas fa-edit" @click="editProfileAvatar()"></i>
-        <input type="file" ref="fileInput" style="display:none" accept="image/*" @change="handleImageUpload" />
+        <input
+          type="file"
+          ref="fileInput"
+          style="display:none"
+          accept="image/*"
+          @change="handleImageUpload"
+        />
       </div>
+
       <div class="profile_user_details font_size_s inter">
         {{ userName }}
         <span class="font_size_xxs">{{ userEmail }}</span>
@@ -32,7 +37,7 @@
     <div class="profile_stats">
       <div class="profile_stat_card" v-for="(item, index) in stats" :key="index">
         <div class="profile_stat_top inter font_size_xs">
-          <div class="profile_stat_value" v-if="item.label == 'Mood Trends'">
+          <div class="profile_stat_value" v-if="item.label === 'Mood Trends'">
             <div v-if="mood">
               <i :class="item.value" style="font-size:1.5rem;"></i>&nbsp;
             </div>
@@ -50,11 +55,19 @@
     </div>
   </div>
 
-  <profileEdit v-if="editProfileBool" @close="editProfileBool = false" :globalUser="userStore"
-    :viewPoint="profileEdit" />
+  <profileEdit
+    v-if="editProfileBool"
+    @close="editProfileBool = false"
+    :globalUser="userStore"
+    :viewPoint="profileEdit"
+  />
 
-  <profileAvatar v-if="avatarProfileBool" @close="avatarProfileBool = false" :globalUser="userStore"
-    :viewPoint="profileAvatar" />
+  <profileAvatar
+    v-if="avatarProfileBool"
+    @close="avatarProfileBool = false"
+    :globalUser="userStore"
+    :viewPoint="profileAvatar"
+  />
 </template>
 
 <script setup>
@@ -63,14 +76,15 @@ import { useUserStore } from '@/data/userStore'
 import profileEdit from '../profile/profileEdit.vue'
 import profileAvatar from '../profile/profileAvatar.vue'
 import { doc, updateDoc } from "firebase/firestore"
+
 import brownMan from '@/assets/avatars/brown_man.png'
 import blondeMan from '@/assets/avatars/blonde_man.png'
 import gingerMan from '@/assets/avatars/ginger_man.png'
 import blackMan from '@/assets/avatars/black_man.png'
-import blackWoman from '@/assets/avatars/black_woman.png'
 import brownWoman from '@/assets/avatars/brunette_woman.png'
-import gingerWoman from '@/assets/avatars/ginger_woman.png'
 import blondeWoman from '@/assets/avatars/blonde_woman.png'
+import gingerWoman from '@/assets/avatars/ginger_woman.png'
+import blackWoman from '@/assets/avatars/black_woman.png'
 import none from '@/assets/avatars/none.png'
 
 const userStore = useUserStore()
@@ -78,7 +92,6 @@ const mood = ref(false)
 const editProfileBool = ref(false)
 const avatarProfileBool = ref(false)
 const globalUser = ref(null)
-const avatar = computed(() => userStore.userData.profileAvatar ? userStore.userData.profileAvatar : 'none')
 
 const avatarMap = {
   brown_man: brownMan,
@@ -97,9 +110,30 @@ const avatarSrc = computed(() => {
   return avatarMap[ref] || none
 })
 
+const userName = computed(() => userStore.userData?.personalInfo.name || '')
+const userEmail = computed(() => userStore.userData?.personalInfo.email || '')
+const userStreak = computed(() => userStore.userData?.streak?.count || 0)
+const journalEntries = computed(() => userStore.journalData.length || 0)
+const courseAmounts = computed(() => userStore.userData?.personalInfo.courses?.length || 0)
+
+const moods = computed(() => [
+  { label: 'Very Sad', ref: 'very_sad', icon: 'far fa-sad-tear' },
+  { label: 'Sad', ref: 'sad', icon: 'far fa-frown' },
+  { label: 'Neutral', ref: 'neutral', icon: 'far fa-meh' },
+  { label: 'Happy', ref: 'happy', icon: 'far fa-grin' },
+  { label: 'Very Happy', ref: 'very_happy', icon: 'far fa-grin-beam' }
+])
+
+const stats = ref([
+  { label: 'App Streak', value: userStreak.value, icon: 'fa fa-signal' },
+  { label: 'Journal Entries', value: journalEntries.value, icon: 'fa fa-book' },
+  { label: 'Mood Trends', value: '', icon: 'fas fa-chart-line' },
+])
+
 onMounted(() => {
-  const todaysDate = new Date().toISOString().split('T')[0]
   globalUser.value = userStore.userData
+
+  const todaysDate = new Date().toISOString().split('T')[0]
 
   if (!userStore.moodData || !userStore.moodData[todaysDate]) return
 
@@ -114,29 +148,12 @@ onMounted(() => {
   }
 })
 
-const moods = computed(() => [
-  { label: 'Very Sad', ref: 'very_sad', icon: 'far fa-sad-tear' },
-  { label: 'Sad', ref: 'sad', icon: 'far fa-frown' },
-  { label: 'Neutral', ref: 'neutral', icon: 'far fa-meh' },
-  { label: 'Happy', ref: 'happy', icon: 'far fa-grin' },
-  { label: 'Very Happy', ref: 'very_happy', icon: 'far fa-grin-beam' }
-])
-
-const userName = computed(() => userStore.userData?.personalInfo.name || '')
-const userEmail = computed(() => userStore.userData?.personalInfo.email || '')
-const userStreak = computed(() => userStore.userData?.streak?.count || 0)
-const journalEntries = computed(() => userStore.journalData.length || 0)
-const courseAmounts = computed(() => userStore.userData?.personalInfo.courses?.length || 0)
-
-const stats = ref([
-  { label: 'App Streak', value: userStreak.value, icon: 'fa fa-signal' },
-  { label: 'Journal Entries', value: journalEntries.value, icon: 'fa fa-book' },
-  { label: 'Mood Trends', value: '', icon: 'fas fa-chart-line' },
-  { label: 'Courses', value: courseAmounts.value, icon: 'fas fa-book-open' }
-])
-
 const editProfile = () => { editProfileBool.value = true }
 const editProfileAvatar = () => { avatarProfileBool.value = true }
+
+const handleImageUpload = (event) => {
+  console.log('Image selected:', event.target.files[0])
+}
 </script>
 
 <style scoped>
@@ -181,28 +198,25 @@ const editProfileAvatar = () => { avatarProfileBool.value = true }
   border: 0.15rem solid #87bfba;
   background-color: #87bfba;
   display: flex;
-  flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
   overflow: hidden;
 }
 
-.pfp_edit_button {
-  width: 7rem;
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: flex-end;
-  color: #87bfba;
-}
-
 .profile_avatar {
   width: 100%;
   height: 100%;
+  border-radius: 50%;
   display: flex;
-  flex-flow: row nowrap;
   justify-content: center;
   align-items: center;
-  border-radius: 50%;
+}
+
+.pfp_edit_button {
+  width: 7rem;
+  display: flex;
+  justify-content: flex-end;
+  color: #87bfba;
 }
 
 .profile_user_details {
@@ -217,9 +231,9 @@ const editProfileAvatar = () => { avatarProfileBool.value = true }
 }
 
 .profile_stats {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(clamp(120px, 40%, 200px), 1fr));
+  width: 80%;
+  display: flex;
+  flex-direction: column;
   gap: clamp(0.8rem, 2vw, 1.5rem);
   justify-content: center;
 }

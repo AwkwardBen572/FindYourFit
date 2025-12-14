@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <div class="features_section">
+    <!-- <div class="features_section">
       <div
         class="feature_card"
         v-for="feature in featureList"
@@ -35,7 +35,7 @@
           <b>{{ feature.label }}</b>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div class="inspiration_section">
       <div class="inspiration_heading inter font_size_xxs">
@@ -104,11 +104,11 @@ const featureList = computed(() => [
 ])
 
 const offerList = computed(() => [
-  {
-    label: 'Expert support at your fingertips',
-    content: 'Find and connect with qualified therapists specializing in various areas.',
-    icon: therapistImg2
-  },
+  // {
+  //   label: 'Expert support at your fingertips',
+  //   content: 'Find and connect with qualified therapists specializing in various areas.',
+  //   icon: therapistImg2
+  // },
   {
     label: 'Personalized mood tracking',
     content: 'Log your daily mood to visualize trends, identify triggers, and gain insights.',
@@ -119,16 +119,16 @@ const offerList = computed(() => [
     content: 'A private space for self-reflection, prompts, and gain thoughts.',
     icon: journalImg2
   },
-  {
-    label: 'Curated learning courses',
-    content: 'Access a library of free and premium courses on mindfulness, stress management, and CBT techniques.',
-    icon: coursesImg2
-  },
-  {
-    label: 'Art Therapy',
-    content: "If you're feeling stressed or sad, sometimes it's easier to express it through art than words.",
-    icon: artImg
-  }
+  // {
+  //   label: 'Curated learning courses',
+  //   content: 'Access a library of free and premium courses on mindfulness, stress management, and CBT techniques.',
+  //   icon: coursesImg2
+  // },
+  // {
+  //   label: 'Art Therapy',
+  //   content: "If you're feeling stressed or sad, sometimes it's easier to express it through art than words.",
+  //   icon: artImg
+  // }
 ])
 
 onMounted(() => {
