@@ -58,34 +58,55 @@
           required
         />
         <select class="form_input inter font_size_xs" v-model="selectedAcademicTitle">
-          <option disabled value="">Select your title</option>
+          <option disabled value="">Select your academic title</option>
           <option v-for="a in academicTitle" :key="a.value">
             {{ a.text }}
           </option>
         </select>
-        <input ref="addressInput" class="form_input inter font_size_xs" type="text" placeholder="Search address..." />
-        <button type="submit" class="form_button inter font_size_xs">
+        <select class="form_input inter font_size_xs" v-model="selectedCredential">
+          <option disabled value="">Select your credential</option>
+          <option v-for="credential in credentialOptions" :key="credential.value">
+            {{ credential.text }}
+          </option>
+        </select>
+        <input v-model="addressSelected" ref="addressInput" class="form_input inter font_size_xs" type="text" placeholder="Search address" />
+        <input
+          class="form_input inter font_size_xs"
+          type="text"
+          placeholder="ID Number"
+          v-model="idNumber"
+          required
+        />
+      </form>
+      <button type="submit" class="form_button inter font_size_xs" @click="addTherapist()">
           Confirm
         </button>
-      </form>
     </div>
   </div>
   <div class="sign_up_button_holder inter font_size_s" v-if="!signUpStep">
     <i class="fas fa-plus" @click="signUpAsTherapist()"></i>
   </div>
+    <errorModal v-if="error" :errorMessage="errorMessage" @close="error = false" />
 </template>
 
 <script setup>
 import { ref, onMounted, watch, nextTick } from 'vue'
 import { useUserStore } from '@/data/userStore'
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"
+import errorModal from '../modals/errorModal.vue'
+import { auth, db } from '../firebase.js'
 
 const userStore = useUserStore()
 
 const email = ref(userStore.userData.personalInfo.email)
 const nameSurname = ref(userStore.userData.personalInfo.name)
+const idNumber = ref('')
 const username = ref('')
 const password = ref('')
 const inputType = ref('password')
+const errorMessage = ref('')
+const error = ref(false)
+const addressSelected = ref('')
 
 const signUpStep = ref(null)
 const therapistListExists = ref(false)
@@ -101,7 +122,7 @@ const title = ref([
   { value: 'rev', text: 'Rev.' },
   { value: 'rev_dr', text: 'Rev. Dr.' },
   { value: 'rabbi', text: 'Rabbi.' },
-  { value: 'sister', text: 'Sister.' },
+  { value: 'sister', text: 'Sister.' }
 ])
 const selectedTitle = ref('')
 
@@ -114,10 +135,22 @@ const academicTitle = ref([
   { value: 'mbchb', text: 'MBCHb' },
   { value: 'other', text: 'Other' }
 ])
+
+const credentialOptions = ref([
+  { value: 'social_worker', text: 'Social Worker' },
+  { value: 'psychiatrist', text: 'Psychiatrist' },
+  { value: 'psychologist', text: 'Psychologist' },
+  { value: 'g_counsellor', text: 'General Counselor' },
+  { value: 'registered_psycho', text: 'Registered Psychotherapist' },
+  { value: 'registered_counsellor', text: 'Registered Counsellor' },
+  { value: 'other', text: 'Other' }
+])
+const selectedCredential = ref('')
+
 const selectedAcademicTitle = ref('')
 const addressInput = ref(null)
 const selectedAddress = ref(null)
-const autocomplete = null
+let autocomplete = null
 
 function loadGoogleMaps() {
   return new Promise((resolve, reject) => {
@@ -185,6 +218,82 @@ const signUpAsTherapist = () => {
 const togglePassword = () => {
   inputType.value = inputType.value === 'password' ? 'text' : 'password'
 }
+
+const addTherapist = async () => {
+
+  console.log(addressSelected.value)
+
+  if(!validateEmail(email.value)) {
+    errorMessage.value = 'Invalid email format!'
+    error.value = true
+    return
+  }
+
+  if(!username.value) {
+    errorMessage.value = 'Please insert a username!'
+    error.value = true
+    return
+  }
+
+  if(!password.value) {
+    errorMessage.value = 'Please insert a password!'
+    error.value = true
+    return
+  }
+
+  if(!selectedTitle.value) {
+    errorMessage.value = 'Please select a title!'
+    error.value = true
+    return
+  }
+
+  if(!nameSurname.value) {
+    errorMessage.value = 'Please insert your full name and surname!'
+    error.value = true
+    return
+  }
+
+  if(!selectedAcademicTitle.value) {
+    errorMessage.value = 'Please select an academic title!'
+    error.value = true
+    return
+  }
+
+  if(!selectedCredential.value) {
+    errorMessage.value = 'Please select your credentials!'
+    error.value = true
+    return
+  }
+
+   if(!selectedAddress.value) {
+    errorMessage.value = 'Please select your address!'
+    error.value = true
+    return
+  }
+
+  if(!idNumber.value || idNumber.value.length !== 13) {
+    errorMessage.value = 'Please inert a valid id number!'
+    error.value = true
+    return
+  }
+
+  const therapistData = {
+    nameSurname: nameSurname.value,
+    userName: username.value,
+    title: selectedTitle.value,
+    email: email.value,
+    credential: selectedCredential.value,
+    academicTitle: selectedAcademicTitle.value,
+    address: selectedAddress.value,
+    idNumber: idNumber.value
+  }
+  console.log(therapistData)
+
+  await setDoc(doc(db, "therapists", userStore.userData.uid), therapistData)
+}
+
+const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
 </script>
 
 <style scoped>
