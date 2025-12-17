@@ -17,27 +17,10 @@
       </div>
       <br />
       <form class="therapist_sign_up_form_holder">
-        <input
-          class="form_input inter font_size_xs"
-          type="text"
-          placeholder="Email Address"
-          v-model="email"
-          required
-        />
-        <input
-          class="form_input inter font_size_xs"
-          type="text"
-          placeholder="Username"
-          v-model="username"
-          required
-        />
-        <input
-          class="form_input inter font_size_xs"
-          :type="inputType"
-          placeholder="Password"
-          v-model="password"
-          required
-        />
+        <input class="form_input inter font_size_xs" type="text" placeholder="Email Address" v-model="email" required />
+        <input class="form_input inter font_size_xs" type="text" placeholder="Username" v-model="username" required />
+        <!-- <input class="form_input inter font_size_xs" :type="inputType" placeholder="Password" v-model="password"
+          required /> -->
         <div class="show_password_toggle inter font_size_xs">
           <label>
             <input type="checkbox" @change="togglePassword" />
@@ -50,13 +33,8 @@
             {{ t.text }}
           </option>
         </select>
-        <input
-          class="form_input inter font_size_xs"
-          type="text"
-          placeholder="Name & Surname"
-          v-model="nameSurname"
-          required
-        />
+        <input class="form_input inter font_size_xs" type="text" placeholder="Name & Surname" v-model="nameSurname"
+          required />
         <select class="form_input inter font_size_xs" v-model="selectedAcademicTitle">
           <option disabled value="">Select your academic title</option>
           <option v-for="a in academicTitle" :key="a.value">
@@ -69,24 +47,19 @@
             {{ credential.text }}
           </option>
         </select>
-        <input v-model="addressSelected" ref="addressInput" class="form_input inter font_size_xs" type="text" placeholder="Search address" />
-        <input
-          class="form_input inter font_size_xs"
-          type="text"
-          placeholder="ID Number"
-          v-model="idNumber"
-          required
-        />
+        <input v-model="addressSelected" ref="addressInput" class="form_input inter font_size_xs" type="text"
+          placeholder="Search address" />
+        <!-- <input class="form_input inter font_size_xs" type="text" placeholder="ID Number" v-model="idNumber" required /> -->
       </form>
       <button type="submit" class="form_button inter font_size_xs" @click="addTherapist()">
-          Confirm
-        </button>
+        Confirm
+      </button>
     </div>
   </div>
   <div class="sign_up_button_holder inter font_size_s" v-if="!signUpStep">
     <i class="fas fa-plus" @click="signUpAsTherapist()"></i>
   </div>
-    <errorModal v-if="error" :errorMessage="errorMessage" @close="error = false" />
+  <errorModal v-if="error" :errorMessage="errorMessage" @close="error = false" />
 </template>
 
 <script setup>
@@ -110,6 +83,7 @@ const addressSelected = ref('')
 
 const signUpStep = ref(null)
 const therapistListExists = ref(false)
+const verifyTherapistInfo = ref(false)
 
 const title = ref([
   { value: 'dr', text: 'Dr.' },
@@ -189,7 +163,6 @@ watch(signUpStep, async (step) => {
     const place = autocomplete.getPlace()
     if (!place.address_components) return
     selectedAddress.value = parseAddress(place)
-    console.log('Selected address:', selectedAddress.value)
   })
 })
 
@@ -221,61 +194,59 @@ const togglePassword = () => {
 
 const addTherapist = async () => {
 
-  console.log(addressSelected.value)
-
-  if(!validateEmail(email.value)) {
+  if (!validateEmail(email.value)) {
     errorMessage.value = 'Invalid email format!'
     error.value = true
     return
   }
 
-  if(!username.value) {
+  if (!username.value) {
     errorMessage.value = 'Please insert a username!'
     error.value = true
     return
   }
 
-  if(!password.value) {
-    errorMessage.value = 'Please insert a password!'
-    error.value = true
-    return
-  }
+  // if (!password.value) {
+  //   errorMessage.value = 'Please insert a password!'
+  //   error.value = true
+  //   return
+  // }
 
-  if(!selectedTitle.value) {
+  if (!selectedTitle.value) {
     errorMessage.value = 'Please select a title!'
     error.value = true
     return
   }
 
-  if(!nameSurname.value) {
+  if (!nameSurname.value) {
     errorMessage.value = 'Please insert your full name and surname!'
     error.value = true
     return
   }
 
-  if(!selectedAcademicTitle.value) {
+  if (!selectedAcademicTitle.value) {
     errorMessage.value = 'Please select an academic title!'
     error.value = true
     return
   }
 
-  if(!selectedCredential.value) {
+  if (!selectedCredential.value) {
     errorMessage.value = 'Please select your credentials!'
     error.value = true
     return
   }
 
-   if(!selectedAddress.value) {
+  if (!selectedAddress.value) {
     errorMessage.value = 'Please select your address!'
     error.value = true
     return
   }
 
-  if(!idNumber.value || idNumber.value.length !== 13) {
-    errorMessage.value = 'Please inert a valid id number!'
-    error.value = true
-    return
-  }
+  // if (!idNumber.value || idNumber.value.length !== 13) {
+  //   errorMessage.value = 'Please inert a valid id number!'
+  //   error.value = true
+  //   return
+  // }
 
   const therapistData = {
     nameSurname: nameSurname.value,
@@ -285,11 +256,20 @@ const addTherapist = async () => {
     credential: selectedCredential.value,
     academicTitle: selectedAcademicTitle.value,
     address: selectedAddress.value,
-    idNumber: idNumber.value
+    // idNumber: idNumber.value,
+    isVerified: false
   }
-  console.log(therapistData)
 
   await setDoc(doc(db, "therapists", userStore.userData.uid), therapistData)
+  errorMessage.value = 'Thank you for providing your info. You will now be taken to a form to provide us with your licensed details in order for us to verify you.'
+  error.value = true
+
+  const url = "https://docs.google.com/forms/d/e/1FAIpQLSe2kKgs6Qnvl1uNfVSVEjUeCRmM8jv6E6O-6xhy-1mIiAYvLg/viewform?usp=sharing";
+
+setTimeout(() => {
+  window.location.href = url;
+}, 10000);
+
 }
 
 const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
