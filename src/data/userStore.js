@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia'
-import { getDoc, setDoc, doc, serverTimestamp } from 'firebase/firestore'
+import { getDoc, getDocs, setDoc, doc, serverTimestamp, collection } from 'firebase/firestore'
 import { db, auth } from '@/firebase'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
     userData: null,
     moodData: null,
-    journalData: null
+    journalData: null,
+    therapists: null
   }),
 
   actions: {
@@ -33,6 +34,8 @@ export const useUserStore = defineStore('user', {
         await this.getMood()
 
         await this.getJournalEntries()
+
+        await this.getTherapists()
       }
     },
     setUserData(user) {
@@ -119,7 +122,21 @@ export const useUserStore = defineStore('user', {
 
         this.journalData = sorted
       }
+    },
+    async getTherapists() {
+      const therapistList = []
 
+      const querySnapshot = await getDocs(collection(db, "therapists"))
+      querySnapshot.forEach((doc) => {
+        therapistList.push({
+          id: doc.id,
+          ...doc.data()
+        })
+      })
+
+      this.therapists = therapistList
+
+      return this.therapists
     }
   }
 })
