@@ -177,6 +177,25 @@ const credentialOptions = ref([
   { value: 'social_worker', text: 'Social Worker' }
 ])
 
+function loadGoogleMaps() {
+  return new Promise((resolve, reject) => {
+    if (window.google?.maps?.places) {
+      resolve()
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBWGRHjfWWoBWojyOBuGi75ACgNAkGobws&libraries=places`
+    script.async = true
+    script.defer = true
+
+    script.onload = resolve
+    script.onerror = reject
+
+    document.head.appendChild(script)
+  })
+}
+
 onMounted(() => {
   verifiedTherapistList.value = []
   unverifiedTherapistList.value = []
@@ -191,6 +210,9 @@ onMounted(() => {
 watch(signUpStep, async step => {
   if (step !== 'step_1') return
   await nextTick()
+  await loadGoogleMaps()
+
+  if (!addressInput.value) return
 
   const autocomplete = new google.maps.places.Autocomplete(addressInput.value, {
     types: ['address'],
