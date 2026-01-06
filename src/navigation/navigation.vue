@@ -35,7 +35,7 @@ import { useRouter } from 'vue-router'
 
 const navigationItems = {
   home: { name: 'Home', icon: '<i class="fa fa-home"></i>' },
-  therapists: { name: 'Therapists', icon: '<i class="fa fa-address-book"></i>' },
+  // therapists: { name: 'Therapists', icon: '<i class="fa fa-address-book"></i>' },
   journal: { name: 'Journal', icon: '<i class="fa fa-book"></i>' },
   profile: { name: 'Profile', icon: '<i class="fa fa-id-card"></i>' }
 }

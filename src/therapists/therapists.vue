@@ -1,7 +1,7 @@
 <template>
   <div
     class="empty_therapy_list inter font_size_xs"
-    v-if="signUpStep === 'home_list' && verifiedTherapistList.length === 0 && unverifiedTherapistList.length === 0"
+    v-if="signUpStep === 'home_list' && verifiedTherapistList.length === 0 && unverifiedTherapistList.length >= 0"
   >
     No therapists are listed at this moment.
   </div>
@@ -99,7 +99,7 @@
       </div>
     </div>
 
-    <div v-else-if="signUpStep === 'home_list' && verifiedTherapistList.length">
+    <div v-else-if="signUpStep === 'home_list' && verifiedTherapistList.length" style="width: 100%; height: 100%;">
       <div
         class="therapist_items_holder inter font_size_xs"
         v-for="therapist in verifiedTherapistList"
@@ -107,7 +107,7 @@
       >
         <div class="therapist_item_holder">
           <b>{{ therapist.nameSurname }}</b><br />
-          {{ therapist.credential }}<br />
+          {{ capitalize(therapist.credential) }}<br />
           {{ therapist.address.city }}, {{ therapist.address.province }}
         </div>
       </div>
@@ -131,7 +131,7 @@
 <script setup>
 import { ref, onMounted, watch, nextTick } from 'vue'
 import { useUserStore } from '@/data/userStore'
-import { doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import errorModal from '../modals/errorModal.vue'
 
@@ -196,6 +196,12 @@ function loadGoogleMaps() {
   })
 }
 
+function capitalize(value) {
+    if (!value) return ''
+    return (value.charAt(0).toUpperCase() + value.slice(1)).replace("_", " ")
+  }
+
+
 onMounted(() => {
   verifiedTherapistList.value = []
   unverifiedTherapistList.value = []
@@ -239,7 +245,16 @@ const addTherapist = async () => {
     return
   }
 
-  await setDoc(doc(db, 'therapists', userStore.userData.uid), {
+  const therapistRef = doc(db, 'therapists', userStore.userData.uid)
+  const therapistSnap = await getDoc(therapistRef)
+
+  if (therapistSnap.exists()) {
+    errorMessage.value = 'You are already registered as a therapist.'
+    error.value = true
+    return
+  }
+
+  await setDoc(therapistRef, {
     email: email.value,
     nameSurname: nameSurname.value,
     userName: username.value,
@@ -247,7 +262,8 @@ const addTherapist = async () => {
     academicTitle: selectedAcademicTitle.value,
     credential: selectedCredential.value,
     address: selectedAddress.value,
-    isVerified: false
+    isVerified: false,
+    createdAt: new Date()
   })
 
   errorMessage.value = 'Thank you. You will be redirected shortly.'
@@ -259,13 +275,20 @@ const addTherapist = async () => {
   }, 8000)
 }
 
-const acceptTherapist = therapist => {
-  therapist.isVerified = true
+const acceptTherapist = async therapist => {
+  await setDoc(doc(db, 'therapists', therapist.id), {
+    isVerified: true
+  }, { merge: true })
+  
+  unverifiedTherapistList.value =
+    unverifiedTherapistList.value.filter(t => t.id !== therapist.id)
+
+  verifiedTherapistList.value.push(therapist)
 }
 
 const declineTherapist = therapist => {
   unverifiedTherapistList.value =
-    unverifiedTherapistList.value.filter(t => t !== therapist)
+    unverifiedTherapistList.value.filter(t => t.id !== therapist.id)
 }
 </script>
 
@@ -395,6 +418,7 @@ select.form_input {
 .contact_buttons_holder {
   width: 100%;
   display: flex;
+  margin-top: 1rem;
 }
 
 .contact_button {
