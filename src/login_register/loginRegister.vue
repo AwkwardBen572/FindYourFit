@@ -1,9 +1,6 @@
 <template>
     <div class="login_page">
         <div class="login_page_content">
-            <div class="login_background_holder">
-
-            </div>
             <div class="login_page_intro inter font_size_xs">
                 <div class="login_page_intro_text">
                     <div class="font_size_m licorice_regular">Welcome to Finding Your Fit</div>
@@ -27,8 +24,8 @@
                             Show Password
                         </label>
                     </div>
-
                 </form>
+
                 <button class="login_page_button inter font_size_xs" @click="handleLogin">
                     {{ pageRef === 'login' ? 'Login' : 'Register' }}
                 </button>
@@ -39,21 +36,21 @@
             </div>
 
             <div class="login_page_social_login">
-                <div class="login_page_social_button" @click="handleGoogleLogin()"></div>
+                <div class="login_page_social_button" @click="handleGoogleLogin"></div>
             </div>
 
             <div class="login_page_toggle_register inter font_size_xs">
                 <u @click="togglePageRef">{{ pageRef === 'login' ? 'Register' : 'Login' }}</u>
             </div>
         </div>
-    </div>
 
-    <errorModal v-if="error" :errorMessage="errorMessage" @close="error = false" />
-    <userInfoModal v-if="register && globalUser" :globalUser="globalUser" />
+        <errorModal v-if="error" :errorMessage="errorMessage" @close="error = false" />
+        <userInfoModal v-if="register && globalUser" :globalUser="globalUser" />
+    </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { auth, db } from '../firebase.js'
 import {
@@ -64,10 +61,10 @@ import {
     linkWithPopup,
     sendPasswordResetEmail
 } from 'firebase/auth'
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore'
+import { useUserStore } from '@/data/userStore'
 import errorModal from '../modals/errorModal.vue'
 import userInfoModal from '../modals/userInfoModal.vue'
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"
-import { useUserStore } from '@/data/userStore'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -83,11 +80,6 @@ const register = ref(false)
 const googleProvider = new GoogleAuthProvider()
 googleProvider.addScope('https://www.googleapis.com/auth/contacts.readonly')
 
-const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-
-const validatePassword = (password) =>
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(password)
-
 const togglePassword = () => {
     inputType.value = inputType.value === 'password' ? 'text' : 'password'
 }
@@ -96,13 +88,14 @@ const togglePageRef = () => {
     pageRef.value = pageRef.value === 'login' ? 'register' : 'login'
 }
 
+const validateEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+
 const handleForgotPassword = () => {
-    if (email.value === '') {
+    if (!email.value) {
         errorMessage.value = 'Please enter your email to reset your password!'
         error.value = true
         return
     }
-
     sendPasswordResetEmail(auth, email.value)
         .then(() => {
             errorMessage.value = 'An email has been sent to reset your password!'
@@ -110,54 +103,46 @@ const handleForgotPassword = () => {
         })
 }
 
-const handleGoogleLogin = async () => {
-    try {
-        const result = await signInWithPopup(auth, googleProvider)
-        const user = result.user
-        if (user) {
-            if (!user) return
-            const docRef = doc(db, 'users', user.uid)
-            const docSnap = await getDoc(docRef)
-            if (docSnap.exists()) {
-                var userData = docSnap.data()
-                if (userData) {
-                    await updateStreak(userData)
-                }
-            }
-        }
-
-        router.push({ name: 'Navigation' })
-
-    } catch (err) {
-        console.log(err.message)
-        errorMessage.value = 'Google login failed!'
-        error.value = true
-    }
+const isYesterday = timestamp => {
+    const lastUpdateDate = timestamp.toDate()
+    const nowDate = new Date()
+    const todayMidnight = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate())
+    const yesterdayMidnight = new Date(todayMidnight)
+    yesterdayMidnight.setDate(todayMidnight.getDate() - 1)
+    return lastUpdateDate >= yesterdayMidnight && lastUpdateDate < todayMidnight
 }
 
-const updateStreak = async (userData) => {
+const updateStreak = async userData => {
     if (userData.streak) {
-        const streakData = userData.streak
-        if (isYesterday(streakData.lastUpdate)) {
-            userData.streak.count = userData.streak.count + 1
+        if (isYesterday(userData.streak.lastUpdate)) {
+            userData.streak.count += 1
         } else {
             userData.streak.count = 1
         }
         userData.streak.lastUpdate = serverTimestamp()
         userData.loginDate = serverTimestamp()
-        await setDoc(doc(db, "users", userData.uid), userData)
+        await setDoc(doc(db, 'users', userData.uid), userData)
     }
 }
 
-const isYesterday = (timestamp) => {
-    const lastUpdateDate = timestamp.toDate();
-    const nowDate = new Date();
-
-    const todayMidnight = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate())
-    const yesterdayMidnight = new Date(todayMidnight)
-    yesterdayMidnight.setDate(todayMidnight.getDate() - 1)
-
-    return lastUpdateDate >= yesterdayMidnight && lastUpdateDate < todayMidnight
+const handleGoogleLogin = async () => {
+    try {
+        const result = await signInWithPopup(auth, googleProvider)
+        const user = result.user
+        if (user) {
+            const docRef = doc(db, 'users', user.uid)
+            const docSnap = await getDoc(docRef)
+            if (docSnap.exists()) {
+                const userData = docSnap.data()
+                if (userData) await updateStreak(userData)
+            }
+        }
+        router.push({ name: 'Navigation' })
+    } catch (err) {
+        console.log(err.message)
+        errorMessage.value = 'Google login failed!'
+        error.value = true
+    }
 }
 
 const handleLogin = async () => {
@@ -171,28 +156,12 @@ const handleLogin = async () => {
             return
         }
 
-        // if (!validatePassword(password.value)) {
-        //     errorMessage.value = `
-        //         Invalid password!<br>
-        //         At least one lowercase letter!<br>
-        //         At least one uppercase letter!<br>
-        //         At least one number!<br>
-        //         At least one special character!<br>
-        //         Minimum of 8 characters!`
-        //     error.value = true
-        //     return
-        // }
-
         if (pageRef.value === 'register') {
             const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value)
             const user = userCredential.user
-
             try {
                 await linkWithPopup(user, googleProvider)
-            } catch (e) {
-                console.warn("Google link failed (optional):", e)
-            }
-
+            } catch (e) { }
             globalUser.value = { uid: user.uid, email: user.email }
             register.value = true
         } else {
@@ -201,7 +170,7 @@ const handleLogin = async () => {
             const docRef = doc(db, 'users', user.uid)
             const docSnap = await getDoc(docRef)
             if (docSnap.exists()) {
-                var userData = docSnap.data()
+                const userData = docSnap.data()
                 if (userData) {
                     await updateStreak(userData)
                     userStore.setUserData(userData)
@@ -209,15 +178,10 @@ const handleLogin = async () => {
                 }
             }
         }
-
     } catch (err) {
-        if (err.code === "auth/invalid-credential") {
-            errorMessage.value = 'Invalid login details.'
-        } else if (err.code === "auth/email-already-in-use") {
-            errorMessage.value = 'Email already in use.'
-        } else {
-            errorMessage.value = 'An unexpected error occurred.'
-        }
+        if (err.code === 'auth/invalid-credential') errorMessage.value = 'Invalid login details.'
+        else if (err.code === 'auth/email-already-in-use') errorMessage.value = 'Email already in use.'
+        else errorMessage.value = 'An unexpected error occurred.'
         error.value = true
     }
 }
@@ -358,12 +322,6 @@ const handleLogin = async () => {
     transform: scale(1.1);
 }
 
-@media (max-width: 1024px) {
-    .login_page_graphic_background {
-        background-position: center right;
-    }
-}
-
 @media (max-width: 768px) {
     .login_page_content::before {
         background-size: 80% auto;
@@ -384,12 +342,6 @@ const handleLogin = async () => {
 }
 
 @media (max-width: 480px) {
-    .login_page__title {
-        padding-left: 0.5rem;
-        font-size: clamp(1.2rem, 6vw, 2rem);
-        text-align: left;
-    }
-
     .login_page_content {
         padding: 1rem;
     }

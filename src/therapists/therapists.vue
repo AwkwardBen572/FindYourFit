@@ -1,8 +1,6 @@
 <template>
-  <div
-    class="empty_therapy_list inter font_size_xs"
-    v-if="signUpStep === 'home_list' && verifiedTherapistList.length === 0 && unverifiedTherapistList.length >= 0"
-  >
+  <div class="empty_therapy_list inter font_size_xs"
+    v-if="signUpStep === 'home_list' && verifiedTherapistList.length === 0 && unverifiedTherapistList.length >= 0">
     No therapists are listed at this moment.
   </div>
 
@@ -32,12 +30,7 @@
           </option>
         </select>
 
-        <input
-          class="form_input inter font_size_xs"
-          type="text"
-          placeholder="Name & Surname"
-          v-model="nameSurname"
-        />
+        <input class="form_input inter font_size_xs" type="text" placeholder="Name & Surname" v-model="nameSurname" />
 
         <select class="form_input inter font_size_xs" v-model="selectedAcademicTitle">
           <option disabled value="">Select your academic title</option>
@@ -53,12 +46,7 @@
           </option>
         </select>
 
-        <input
-          ref="addressInput"
-          class="form_input inter font_size_xs"
-          type="text"
-          placeholder="Search address"
-        />
+        <input ref="addressInput" class="form_input inter font_size_xs" type="text" placeholder="Search address" />
       </form>
 
       <button class="form_button inter font_size_xs" @click="addTherapist">
@@ -68,11 +56,8 @@
 
     <div style="width: 100%; height: 100%;" v-else-if="signUpStep === 'verify_therapist'">
       <div v-if="unverifiedTherapistList.length">
-        <div
-          class="therapist_items_holder inter font_size_xs"
-          v-for="therapist in unverifiedTherapistList"
-          :key="therapist.userName"
-        >
+        <div class="therapist_items_holder inter font_size_xs" v-for="therapist in unverifiedTherapistList"
+          :key="therapist.userName">
           <div class="therapist_item_holder">
             <b>{{ therapist.nameSurname }}</b><br />
             {{ therapist.email }}<br />
@@ -100,11 +85,8 @@
     </div>
 
     <div v-else-if="signUpStep === 'home_list' && verifiedTherapistList.length" style="width: 100%; height: 100%;">
-      <div
-        class="therapist_items_holder inter font_size_xs"
-        v-for="therapist in verifiedTherapistList"
-        :key="therapist.userName"
-      >
+      <div class="therapist_items_holder inter font_size_xs" v-for="therapist in verifiedTherapistList"
+        :key="therapist.userName">
         <div class="therapist_item_holder">
           <b>{{ therapist.nameSurname }}</b><br />
           {{ capitalize(therapist.credential) }}<br />
@@ -118,10 +100,7 @@
     <i class="fas fa-plus" @click="signUpAsTherapist"></i>
   </div>
 
-  <div
-    class="verify_therapists_holder inter font_size_s"
-    v-if="signUpStep === 'home_list' && isAdmin === 1"
-  >
+  <div class="verify_therapists_holder inter font_size_s" v-if="signUpStep === 'home_list' && isAdmin === 1">
     <i class="fas fa-award" @click="verifyTherapists"></i>
   </div>
 
@@ -136,6 +115,8 @@ import { db } from '../firebase.js'
 import errorModal from '../modals/errorModal.vue'
 
 const userStore = useUserStore()
+
+const STORAGE_KEY = 'therapist_signup_state'
 
 const email = ref(userStore.userData.personalInfo.email)
 const nameSurname = ref(userStore.userData.personalInfo.name)
@@ -177,6 +158,11 @@ const credentialOptions = ref([
   { value: 'social_worker', text: 'Social Worker' }
 ])
 
+function capitalize(value) {
+  if (!value) return ''
+  return (value.charAt(0).toUpperCase() + value.slice(1)).replace('_', ' ')
+}
+
 function loadGoogleMaps() {
   return new Promise((resolve, reject) => {
     if (window.google?.maps?.places) {
@@ -185,22 +171,15 @@ function loadGoogleMaps() {
     }
 
     const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBWGRHjfWWoBWojyOBuGi75ACgNAkGobws&libraries=places`
+    script.src =
+      'https://maps.googleapis.com/maps/api/js?key=AIzaSyBWGRHjfWWoBWojyOBuGi75ACgNAkGobws&libraries=places'
     script.async = true
     script.defer = true
-
     script.onload = resolve
     script.onerror = reject
-
     document.head.appendChild(script)
   })
 }
-
-function capitalize(value) {
-    if (!value) return ''
-    return (value.charAt(0).toUpperCase() + value.slice(1)).replace("_", " ")
-  }
-
 
 onMounted(() => {
   verifiedTherapistList.value = []
@@ -211,13 +190,48 @@ onMounted(() => {
       ? verifiedTherapistList.value.push(t)
       : unverifiedTherapistList.value.push(t)
   })
+
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
+  if (saved) {
+    signUpStep.value = saved.signUpStep || 'home_list'
+    username.value = saved.username || ''
+    selectedTitle.value = saved.selectedTitle || ''
+    selectedAcademicTitle.value = saved.selectedAcademicTitle || ''
+    selectedCredential.value = saved.selectedCredential || ''
+    selectedAddress.value = saved.selectedAddress || null
+  }
 })
+
+watch(
+  [
+    signUpStep,
+    username,
+    selectedTitle,
+    selectedAcademicTitle,
+    selectedCredential,
+    selectedAddress
+  ],
+  () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        signUpStep: signUpStep.value,
+        username: username.value,
+        selectedTitle: selectedTitle.value,
+        selectedAcademicTitle: selectedAcademicTitle.value,
+        selectedCredential: selectedCredential.value,
+        selectedAddress: selectedAddress.value
+      })
+    )
+  },
+  { deep: true }
+)
 
 watch(signUpStep, async step => {
   if (step !== 'step_1') return
+
   await nextTick()
   await loadGoogleMaps()
-
   if (!addressInput.value) return
 
   const autocomplete = new google.maps.places.Autocomplete(addressInput.value, {
@@ -228,8 +242,13 @@ watch(signUpStep, async step => {
   autocomplete.addListener('place_changed', () => {
     const place = autocomplete.getPlace()
     selectedAddress.value = {
-      city: place.address_components?.find(c => c.types.includes('locality'))?.long_name || '',
-      province: place.address_components?.find(c => c.types.includes('administrative_area_level_1'))?.long_name || ''
+      city:
+        place.address_components?.find(c => c.types.includes('locality'))?.long_name ||
+        '',
+      province:
+        place.address_components?.find(c =>
+          c.types.includes('administrative_area_level_1')
+        )?.long_name || ''
     }
   })
 })
@@ -266,6 +285,8 @@ const addTherapist = async () => {
     createdAt: new Date()
   })
 
+  localStorage.removeItem(STORAGE_KEY)
+
   errorMessage.value = 'Thank you. You will be redirected shortly.'
   error.value = true
 
@@ -276,10 +297,12 @@ const addTherapist = async () => {
 }
 
 const acceptTherapist = async therapist => {
-  await setDoc(doc(db, 'therapists', therapist.id), {
-    isVerified: true
-  }, { merge: true })
-  
+  await setDoc(
+    doc(db, 'therapists', therapist.id),
+    { isVerified: true },
+    { merge: true }
+  )
+
   unverifiedTherapistList.value =
     unverifiedTherapistList.value.filter(t => t.id !== therapist.id)
 

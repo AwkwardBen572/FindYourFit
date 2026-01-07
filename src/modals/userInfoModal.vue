@@ -16,13 +16,10 @@
                 <form class="modal_form_holder" @submit.prevent="registerUserInfo">
                     <input class="modal_input inter font_size_xs" type="text" placeholder="Name & Surname"
                         v-model="nameSurname" required />
-
                     <input class="modal_input inter font_size_xs" type="tel" placeholder="Contact Number"
                         v-model="contactNumber" required />
-
                     <input class="modal_input inter font_size_xs" type="text" placeholder="Date of Birth (yyyy/mm/dd)"
                         v-model="dateOfBirth" required />
-
                     <select class="modal_input inter font_size_xs" v-model="selectedOption">
                         <option disabled value="">Please select one</option>
                         <option v-for="option in options" :key="option.value" :value="option.value">
@@ -36,9 +33,7 @@
                         </option>
                     </select>
 
-                    <button type="submit" class="modal_button inter font_size_xs">
-                        Confirm
-                    </button>
+                    <button type="submit" class="modal_button inter font_size_xs">Confirm</button>
                 </form>
             </div>
         </div>
@@ -48,64 +43,47 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
-import errorModal from '../modals/errorModal.vue'
-import { getAuth } from "firebase/auth"
-import { doc, setDoc, serverTimestamp } from "firebase/firestore"
+import { useRouter } from 'vue-router'
+import { getAuth } from 'firebase/auth'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { useUserStore } from '@/data/userStore'
-
+import errorModal from '../modals/errorModal.vue'
 
 const userStore = useUserStore()
+const router = useRouter()
 const emit = defineEmits(['close'])
-const props = defineProps({
-    globalUser: {
-        type: Object,
-        required: true
-    }
-})
+const props = defineProps({ globalUser: { type: Object, required: true } })
+
 const countries = ref([])
 const selectedCountry = ref('')
-
-onMounted(async () => {
-    const res = await fetch('https://restcountries.com/v3.1/all?fields=name,cca3,flags')
-    const data = await res.json()
-    countries.value = data.sort((a, b) =>
-        a.name.common.localeCompare(b.name.common)
-    )
-})
-
-const router = useRouter()
 const nameSurname = ref('')
 const contactNumber = ref('')
 const dateOfBirth = ref('')
-const errorMessage = ref('')
-const error = ref(false)
+const selectedOption = ref('')
 const options = ref([
     { value: 'male', text: 'Male' },
     { value: 'female', text: 'Female' },
     { value: 'other', text: 'Other' }
 ])
-const selectedOption = ref('')
 
-function isValid10DigitContact(contact) {
-    const regex = /^\d{10}$/
-    return regex.test(contact)
-}
+const error = ref(false)
+const errorMessage = ref('')
 
-function isValidDateFormat(dateStr) {
-    const regex = /^\d{4}\/\d{2}\/\d{2}$/
-    if (!regex.test(dateStr)) return false
+onMounted(async () => {
+    const res = await fetch('https://restcountries.com/v3.1/all?fields=name,cca3,flags')
+    const data = await res.json()
+    countries.value = data.sort((a, b) => a.name.common.localeCompare(b.name.common))
+})
 
+const isValid10DigitContact = (contact) => /^\d{10}$/.test(contact)
+
+const isValidDateFormat = (dateStr) => {
+    if (!/^\d{4}\/\d{2}\/\d{2}$/.test(dateStr)) return false
     const [year, month, day] = dateStr.split('/').map(Number)
     const date = new Date(year, month - 1, day)
-
-    return (
-        date.getFullYear() === year &&
-        date.getMonth() === month - 1 &&
-        date.getDate() === day
-    )
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
 }
 
 const registerUserInfo = async () => {
@@ -135,20 +113,13 @@ const registerUserInfo = async () => {
             country: selectedCountry.value,
             gender: selectedOption.value
         },
-        streak: {
-            count: parseInt(1),
-            lastUpdate: serverTimestamp()
-        },
+        streak: { count: 1, lastUpdate: serverTimestamp() },
         loginDate: new Date().toISOString(),
-        uid: props.globalUser.uid,
+        uid: props.globalUser.uid
     }
 
-
-
-    await setDoc(doc(db, "users", props.globalUser.uid), user)
-
+    await setDoc(doc(db, 'users', props.globalUser.uid), user)
     userStore.setUserData(user)
-
     router.push({ name: 'Navigation' })
 }
 
@@ -172,7 +143,6 @@ const handleErrorModalClose = () => {
 .modal_holder {
     width: 90%;
     max-width: 400px;
-    /* text-align: center; */
     background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -180,7 +150,7 @@ const handleErrorModalClose = () => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: #000000;
+    color: #000;
 }
 
 .modal_heading_holder {
@@ -237,9 +207,6 @@ const handleErrorModalClose = () => {
     outline: none;
     padding: 0 0.5rem;
     box-sizing: border-box;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
     background-color: #fff;
 }
 
@@ -255,7 +222,7 @@ select.modal_input {
     background-color: #87bfba;
     border: none;
     border-radius: 0.5rem;
-    color: #ffffff;
+    color: #fff;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }

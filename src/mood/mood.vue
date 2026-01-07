@@ -1,14 +1,12 @@
 <template>
   <div class="mood_tracker_holder">
     <div class="mood_heading_holder inter font_size_xs">How am I feeling today?</div>
+
     <div class="mood_icons_holder">
       <div class="mood_icon_holder" v-for="mood in moods" :key="mood.ref">
-        <div
-          :class="mood.icon"
+        <div :class="mood.icon"
           style="font-size: 3rem; border: 0.2rem solid #87bfba; padding:0.5rem; border-radius: 50%"
-          v-if="selectedMood == mood.ref"
-          @click="setMood(mood.ref)"
-        ></div>
+          v-if="selectedMood === mood.ref" @click="setMood(mood.ref)"></div>
         <div :class="mood.icon" style="font-size: 3rem" v-else @click="setMood(mood.ref)"></div>
       </div>
     </div>
@@ -16,25 +14,19 @@
     <div class="influence_holder" style="height: 25rem;">
       <div class="influence_heading_holder inter font_size_xs"><b>What might be influencing this?</b></div>
       <div class="influence_items_holder">
-        <div
-          class="influence_item_holder inter font_size_xxs"
-          v-for="influenceItem in influences"
-          :key="influenceItem.ref"
-          style="height: 12%;"
-        >
-          &emsp;<input type="checkbox" v-model="selectedInfluences" :value="influenceItem.ref" />&nbsp;{{ influenceItem.label }}
+        <div class="influence_item_holder inter font_size_xxs" v-for="influenceItem in influences"
+          :key="influenceItem.ref" style="height: 12%;">
+          &emsp;<input type="checkbox" v-model="selectedInfluences" :value="influenceItem.ref" />&nbsp;{{
+            influenceItem.label }}
         </div>
       </div>
     </div>
 
     <div class="influence_holder">
       <div class="influence_heading_holder inter font_size_xs"><b>Optional Notes</b></div>
-      <textarea
-        placeholder="Write a few words about why you feel the way you feel"
+      <textarea placeholder="Write a few words about why you feel the way you feel"
         style="width: 90%; height: 60%; padding:0.5rem; border: 0.1rem solid #87bfba; border-radius: 1rem;"
-        class="inter font_size_xs"
-        v-model="optionalNotes"
-      ></textarea>
+        class="inter font_size_xs" v-model="optionalNotes"></textarea>
     </div>
 
     <div class="save_button inter font_size_xxs" @click="saveMood()">Save</div>
@@ -99,7 +91,7 @@ const saveMood = async () => {
     }
   }
 
-  await setDoc(doc(db, "mood", userStore.userData.uid), mood, { merge: true })
+  await setDoc(doc(db, 'mood', userStore.userData.uid), mood, { merge: true })
 
   moodSaved.value = true
   modalMessage.value = 'Thank you for logging your mood. It will be taken into consideration.'
@@ -117,7 +109,7 @@ const handleErrorModalClose = () => {
 .mood_tracker_holder {
   width: 100%;
   display: flex;
-  flex-flow: column nowrap;
+  flex-direction: column;
   align-items: center;
 }
 
@@ -141,7 +133,6 @@ const handleErrorModalClose = () => {
 .mood_icon_holder {
   width: 15%;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   color: #87bfba;
@@ -149,7 +140,6 @@ const handleErrorModalClose = () => {
 
 .influence_holder {
   width: 90%;
-  height: 20rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -160,9 +150,7 @@ const handleErrorModalClose = () => {
 
 .influence_heading_holder {
   width: 90%;
-  height: 10%;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   margin: 1rem 0;
@@ -170,9 +158,8 @@ const handleErrorModalClose = () => {
 
 .influence_items_holder {
   width: 100%;
-  height: 90%;
   display: flex;
-  flex-flow: row wrap;
+  flex-wrap: wrap;
   justify-content: space-around;
   align-items: center;
 }
@@ -187,7 +174,7 @@ const handleErrorModalClose = () => {
   align-items: center;
 }
 
-input[type="checkbox"] {
+input[type='checkbox'] {
   appearance: none;
   -webkit-appearance: none;
   background-color: #fff;
@@ -201,18 +188,18 @@ input[type="checkbox"] {
   transition: all 0.2s ease;
 }
 
-input[type="checkbox"]:checked {
+input[type='checkbox']:checked {
   background-color: #87bfba;
   border-color: #87bfba;
 }
 
-input[type="checkbox"]:checked::after {
+input[type='checkbox']:checked::after {
   content: '✔';
   position: absolute;
   top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #ffffff;
+  color: #fff;
   font-size: 14px;
 }
 
@@ -224,7 +211,7 @@ input[type="checkbox"]:checked::after {
   align-items: center;
   border-radius: 1rem;
   background-color: #87bfba;
-  color: #ffffff;
+  color: #fff;
   cursor: pointer;
   margin-bottom: 5rem;
 }

@@ -3,7 +3,6 @@
     <div class="greeting_section licorice_regular font_size_m">
       Good {{ getTimeOfDay() }}, {{ userName }}!
     </div>
-
     <div class="checkin_section">
       <div class="feeling_section">
         <div class="feeling_heading inter font_size_xs">
@@ -15,28 +14,6 @@
         </div>
       </div>
     </div>
-
-    <!-- <div class="features_section">
-      <div
-        class="feature_card"
-        v-for="feature in featureList"
-        :key="feature.label"
-      >
-        <div
-          class="feature_icon"
-          :style="{
-            backgroundImage: `url(${feature.url})`,
-            backgroundSize: '50% 80%',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }"
-        ></div>
-        <div class="feature_label inter font_size_xxs">
-          <b>{{ feature.label }}</b>
-        </div>
-      </div>
-    </div> -->
-
     <div class="inspiration_section">
       <div class="inspiration_heading inter font_size_xxs">
         <b>Inspiration</b>
@@ -45,7 +22,6 @@
         {{ dailyQuote.content }}
       </div>
     </div>
-
     <div class="offer_section">
       <div class="offer_heading inter font_size_xs">
         <b>What we offer</b>
@@ -53,15 +29,12 @@
       <div class="offer_list">
         <div class="offer_card" v-for="offer in offerList" :key="offer.label">
           <div class="offer_icon_wrapper">
-            <div
-              class="feature_icon"
-              :style="{
-                backgroundImage: `url(${offer.icon})`,
-                backgroundSize: '50% 80%',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
-              }"
-            ></div>
+            <div class="feature_icon" :style="{
+              backgroundImage: `url(${offer.icon})`,
+              backgroundSize: '50% 80%',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }"></div>
           </div>
           <div class="offer_content_wrapper">
             <div class="offer_title inter font_size_xxs">
@@ -88,8 +61,6 @@ import journalImg2 from '@/assets/journal.png'
 import coursesImg from '@/assets/my_courses.png'
 import therapistImg2 from '@/assets/therapist.png'
 import moodImg from '@/assets/mood_Track.png'
-import coursesImg2 from '@/assets/courses.png'
-import artImg from '@/assets/art.png'
 
 const userStore = useUserStore()
 const dailyQuote = ref({ content: '', author: '' })
@@ -118,17 +89,7 @@ const offerList = computed(() => [
     label: 'Journaling',
     content: 'A private space for self-reflection, prompts, and gain thoughts.',
     icon: journalImg2
-  },
-  // {
-  //   label: 'Curated learning courses',
-  //   content: 'Access a library of free and premium courses on mindfulness, stress management, and CBT techniques.',
-  //   icon: coursesImg2
-  // },
-  // {
-  //   label: 'Art Therapy',
-  //   content: "If you're feeling stressed or sad, sometimes it's easier to express it through art than words.",
-  //   icon: artImg
-  // }
+  }
 ])
 
 onMounted(() => {
@@ -145,7 +106,6 @@ const getTimeOfDay = () => {
 </script>
 
 <style scoped>
-
 .home_container {
   display: flex;
   flex-direction: column;
@@ -210,44 +170,6 @@ const getTimeOfDay = () => {
   cursor: pointer;
 }
 
-.features_section {
-  width: 95%;
-  height: 7rem;
-  margin-bottom: 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: nowrap;
-}
-
-.feature_card {
-  flex: 1 1 30%;
-  height: 100%;
-  border-radius: 1rem;
-  box-shadow: 0.1rem 0.1rem 1rem 0.2rem rgba(135, 191, 186, 0.4);
-  display: flex;
-  flex-direction: column;
-  margin-right: 1%;
-}
-
-.feature_card:last-child {
-  margin-right: 0;
-}
-
-.feature_icon {
-  width: 100%;
-  height: 80%;
-}
-
-.feature_label {
-  width: 100%;
-  height: 20%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
 .inspiration_section {
   width: 95%;
   max-width: 600px;
@@ -262,9 +184,7 @@ const getTimeOfDay = () => {
 
 .inspiration_heading {
   width: 90%;
-  height: 20%;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   margin-bottom: 1rem;
   padding-top: 1rem;
@@ -272,9 +192,8 @@ const getTimeOfDay = () => {
 
 .quote_text {
   width: 90%;
-  height: 70%;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   padding-bottom: 1rem;
 }
 
@@ -289,9 +208,7 @@ const getTimeOfDay = () => {
 .offer_heading {
   width: 100%;
   display: flex;
-  flex-direction: column;
   justify-content: center;
-  align-items: center;
   margin-bottom: 1rem;
 }
 
@@ -308,16 +225,13 @@ const getTimeOfDay = () => {
 
 .offer_icon_wrapper {
   width: 25%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  text-align: center;
 }
 
 .offer_content_wrapper {
   width: 70%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -325,18 +239,14 @@ const getTimeOfDay = () => {
 
 .offer_title {
   width: 100%;
-  height: 30%;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .offer_description {
   width: 100%;
-  height: 70%;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 @media (max-width: 768px) {

@@ -6,16 +6,8 @@
   <therapists v-else-if="currentPage === 'therapists'"></therapists>
 
   <div class="navigation_bar_holder">
-    <div
-      class="navigation_item_holder inter font_size_xxs"
-      v-for="(item, key) in navigationItems"
-      :key="key"
-    >
-      <div
-        class="navigation_item"
-        :class="{ active: currentPage === key }"
-        @click="setPage(key)"
-      >
+    <div class="navigation_item_holder inter font_size_xxs" v-for="(item, key) in navigationItems" :key="key">
+      <div class="navigation_item" :class="{ active: currentPage === key }" @click="setPage(key)">
         <div v-html="item.icon"></div>
         <div>{{ item.name }}</div>
       </div>
@@ -24,38 +16,33 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/data/userStore'
 import Profile from '../profile/profile.vue'
 import Home from '../home/home.vue'
 import Mood from '../mood/mood.vue'
 import JournalEntry from '../journal/journal.vue'
 import Therapists from '../therapists/therapists.vue'
-import { useRouter } from 'vue-router'
 
 const navigationItems = {
   home: { name: 'Home', icon: '<i class="fa fa-home"></i>' },
-  // therapists: { name: 'Therapists', icon: '<i class="fa fa-address-book"></i>' },
   journal: { name: 'Journal', icon: '<i class="fa fa-book"></i>' },
   profile: { name: 'Profile', icon: '<i class="fa fa-id-card"></i>' }
 }
 
 const userStore = useUserStore()
-const router = useRouter()
 const currentPage = ref('home')
 
 const setPage = (page) => {
   currentPage.value = page
+  localStorage.setItem('currentPage', page)
 }
 
-watch(() => userStore.userData, (newVal) => {
-  if (newVal) {
-    // You can add logic here if needed
-  }
-})
-
 onMounted(() => {
-  // Any initialization logic if needed
+  const savedPage = localStorage.getItem('currentPage')
+  if (savedPage && navigationItems[savedPage]) {
+    currentPage.value = savedPage
+  }
 })
 </script>
 
@@ -88,6 +75,7 @@ onMounted(() => {
   align-items: center;
   color: #87bfba;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .navigation_item.active {

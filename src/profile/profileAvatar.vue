@@ -8,32 +8,23 @@
 
       <div class="modal_content_holder inter font_size_xs">
         <div class="modal_avatars_holder" v-for="avatar in avatars" :key="avatar.ref">
-          <div
-            v-if="avatar.ref === selectedAvatar"
-            class="modal_avatar_selected"
-            @click="selectAvatar(avatar.ref)"
+          <div v-if="avatar.ref === selectedAvatar" class="modal_avatar_selected" @click="selectAvatar(avatar.ref)"
             :style="{
               backgroundImage: `url(${avatar.url})`,
               backgroundSize: '100% 100%',
               backgroundPosition: 'center center',
               backgroundRepeat: 'no-repeat'
-            }"
-          ></div>
-          <div
-            v-else
-            class="modal_avatar"
-            @click="selectAvatar(avatar.ref)"
-            :style="{
-              backgroundImage: `url(${avatar.url})`,
-              backgroundSize: '100% 100%',
-              backgroundPosition: 'center center',
-              backgroundRepeat: 'no-repeat'
-            }"
-          ></div>
+            }"></div>
+          <div v-else class="modal_avatar" @click="selectAvatar(avatar.ref)" :style="{
+            backgroundImage: `url(${avatar.url})`,
+            backgroundSize: '100% 100%',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat'
+          }"></div>
         </div>
       </div>
 
-      <button type="submit" class="modal_button inter font_size_xs" @click="setProfileAvatar()">
+      <button type="submit" class="modal_button inter font_size_xs" @click="setProfileAvatar">
         Confirm
       </button>
     </div>
@@ -41,9 +32,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { doc, setDoc, serverTimestamp } from "firebase/firestore"
-import { getAuth } from "firebase/auth"
+import { ref, computed, onMounted } from 'vue'
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
+import { getAuth } from 'firebase/auth'
 import { useUserStore } from '@/data/userStore'
 import { db } from '@/firebase'
 
@@ -81,23 +72,36 @@ const selectedAvatar = ref('none')
 
 const selectAvatar = (avatar) => {
   selectedAvatar.value = avatar
+  localStorage.setItem('selectedAvatar', avatar)
 }
+
+onMounted(() => {
+  const savedAvatar = localStorage.getItem('selectedAvatar')
+  if (savedAvatar) {
+    selectedAvatar.value = savedAvatar
+  }
+})
 
 const setProfileAvatar = async () => {
   const auth = getAuth()
   const userData = props.globalUser.userData
   const currentUser = auth.currentUser
 
-  const user = {
-    profileAvatar: selectedAvatar.value,
-    profileEdited: serverTimestamp()
-  }
+  await setDoc(
+    doc(db, 'users', userData.uid || currentUser.uid),
+    {
+      profileAvatar: selectedAvatar.value,
+      profileEdited: serverTimestamp()
+    },
+    { merge: true }
+  )
 
-  await setDoc(doc(db, "users", userData.uid ? userData.uid : currentUser.uid), user, { merge: true })
   userStore.userData.profileAvatar = selectedAvatar.value
+  localStorage.removeItem('selectedAvatar')
   emit('close')
 }
 </script>
+
 
 <style scoped>
 .modal_overlay {

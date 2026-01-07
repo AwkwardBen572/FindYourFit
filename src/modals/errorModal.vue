@@ -33,7 +33,6 @@ const props = defineProps({
 .modal_holder {
     width: 90%;
     max-width: 400px;
-    text-align: center;
     background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -41,7 +40,7 @@ const props = defineProps({
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: #ffffff;
+    text-align: center;
 }
 
 .modal_heading_holder {

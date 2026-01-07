@@ -4,6 +4,7 @@
       <div class="profile_title font_size_s inter"></div>
       <div class="profile_edit_btn">
         <i class="fas fa-edit" @click="editProfile()"></i>
+        <i class="fas fa-sign-out-alt" @click="logout()"></i>
       </div>
     </div>
 
@@ -19,13 +20,7 @@
 
       <div class="pfp_edit_button">
         <i class="fas fa-edit" @click="editProfileAvatar()"></i>
-        <input
-          type="file"
-          ref="fileInput"
-          style="display:none"
-          accept="image/*"
-          @change="handleImageUpload"
-        />
+        <input type="file" ref="fileInput" style="display:none" accept="image/*" @change="handleImageUpload" />
       </div>
 
       <div class="profile_user_details font_size_s inter">
@@ -55,19 +50,11 @@
     </div>
   </div>
 
-  <profileEdit
-    v-if="editProfileBool"
-    @close="editProfileBool = false"
-    :globalUser="userStore"
-    :viewPoint="profileEdit"
-  />
+  <profileEdit v-if="editProfileBool" @close="editProfileBool = false" :globalUser="userStore"
+    :viewPoint="profileEdit" />
 
-  <profileAvatar
-    v-if="avatarProfileBool"
-    @close="avatarProfileBool = false"
-    :globalUser="userStore"
-    :viewPoint="profileAvatar"
-  />
+  <profileAvatar v-if="avatarProfileBool" @close="avatarProfileBool = false" :globalUser="userStore"
+    :viewPoint="profileAvatar" />
 </template>
 
 <script setup>
@@ -75,7 +62,9 @@ import { ref, onMounted, computed } from 'vue'
 import { useUserStore } from '@/data/userStore'
 import profileEdit from '../profile/profileEdit.vue'
 import profileAvatar from '../profile/profileAvatar.vue'
-import { doc, updateDoc } from "firebase/firestore"
+import { signOut } from 'firebase/auth'
+import { auth } from '@/firebase'
+import { useRouter } from 'vue-router'
 
 import brownMan from '@/assets/avatars/brown_man.png'
 import blondeMan from '@/assets/avatars/blonde_man.png'
@@ -87,6 +76,7 @@ import gingerWoman from '@/assets/avatars/ginger_woman.png'
 import blackWoman from '@/assets/avatars/black_woman.png'
 import none from '@/assets/avatars/none.png'
 
+const router = useRouter()
 const userStore = useUserStore()
 const mood = ref(false)
 const editProfileBool = ref(false)
@@ -114,7 +104,6 @@ const userName = computed(() => userStore.userData?.personalInfo.name || '')
 const userEmail = computed(() => userStore.userData?.personalInfo.email || '')
 const userStreak = computed(() => userStore.userData?.streak?.count || 0)
 const journalEntries = computed(() => userStore.journalData.length || 0)
-const courseAmounts = computed(() => userStore.userData?.personalInfo.courses?.length || 0)
 
 const moods = computed(() => [
   { label: 'Very Sad', ref: 'very_sad', icon: 'far fa-sad-tear' },
@@ -132,7 +121,6 @@ const stats = ref([
 
 onMounted(() => {
   globalUser.value = userStore.userData
-
   const todaysDate = new Date().toISOString().split('T')[0]
 
   if (!userStore.moodData || !userStore.moodData[todaysDate]) return
@@ -149,6 +137,10 @@ onMounted(() => {
 })
 
 const editProfile = () => { editProfileBool.value = true }
+const logout = async () => {
+  await signOut(auth)
+  router.push({ name: 'Login' })
+}
 const editProfileAvatar = () => { avatarProfileBool.value = true }
 
 const handleImageUpload = (event) => {
@@ -180,6 +172,9 @@ const handleImageUpload = (event) => {
 }
 
 .profile_edit_btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
   color: #87bfba;
   cursor: pointer;
 }
