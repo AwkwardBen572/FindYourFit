@@ -17,6 +17,7 @@
       <textarea placeholder="What's weighing on your mind today? Or what's a small win?"
         class="journal_textarea inter font_size_xs" v-model="journalEntryContent"></textarea>
     </div>
+    <br>
     <div class="save_button inter font_size_xxs" @click="saveJournal">
       Save
     </div>

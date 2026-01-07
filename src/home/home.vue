@@ -225,9 +225,15 @@ const getTimeOfDay = () => {
 
 .offer_icon_wrapper {
   width: 25%;
+  height: 100%; 
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.feature_icon {
+  width: 100%;
+  height: 100%;
 }
 
 .offer_content_wrapper {
