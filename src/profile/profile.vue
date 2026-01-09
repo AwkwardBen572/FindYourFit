@@ -32,7 +32,7 @@
     <div class="profile_stats">
       <div class="profile_stat_card" v-for="(item, index) in stats" :key="index" @click="openWidget(item)">
         <div class="profile_stat_top inter font_size_xs">
-          <div class="profile_stat_value" v-if="item.label === 'Mood Trends'">
+          <div class="profile_stat_value" v-if="item.label === 'Mood Overview'">
             <div v-if="mood">
               <i :class="item.value" style="font-size:1.5rem;"></i>&nbsp;
             </div>
@@ -117,7 +117,7 @@ const moods = computed(() => [
 const stats = ref([
   { label: 'App Streak', value: userStreak.value, icon: 'fa fa-signal' },
   { label: 'Journal Entries', value: journalEntries.value, icon: 'fa fa-book' },
-  { label: 'Mood Trends', value: '', icon: 'fas fa-chart-line' },
+  { label: 'Mood Overview', value: '', icon: 'fas fa-chart-line' },
 ])
 
 onMounted(() => {
@@ -149,7 +149,7 @@ const handleImageUpload = (event) => {
 }
 
 const openWidget = (item) => {
-  if(item.label == "Mood Trends") {
+  if(item.label == "Mood Overview") {
     emit('setPage', 'moodTrends')
   }
 }

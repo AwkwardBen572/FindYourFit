@@ -1,7 +1,7 @@
 <template>
   <div class="mood_trends_holder">
     <div class="mood_trends_heading_holder inter font_size_xs">
-      My Mood Trends
+      My Mood Overview
     </div>
     <br>
     <div class="mood_trends_timerange_holder">
@@ -16,11 +16,19 @@
     <div class="mood_trends_graph_holder">
       <canvas id="moodPieChart" width="400" height="300"></canvas>
     </div>
+    <br>
+    <div class="mood_trends_items">
+      <div class="mood_trend_explained_holder"  v-for="mood in moods">
+        <div class="mood_trend_color" :style="{ backgroundColor: mood.color }"></div>
+        &emsp;
+        <i :class="mood.icon" style="font-size:1.4rem;" :style="{color: mood.color}"></i>&nbsp;
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, nextTick } from "vue"
+import { ref, watch, onMounted, nextTick, computed } from "vue"
 import { doc, getDoc } from "firebase/firestore"
 import { db } from "@/firebase"
 import { useUserStore } from '@/data/userStore'
@@ -28,6 +36,13 @@ import { Chart, PieController, ArcElement, Tooltip, Legend } from 'chart.js'
 
 Chart.register(PieController, ArcElement, Tooltip, Legend)
 
+const moods = computed(() => [
+  { label: 'Very Sad', ref: 'very_sad', icon: 'far fa-sad-tear', color: "#6A5D7B" },
+  { label: 'Sad', ref: 'sad', icon: 'far fa-frown', color: "#9FB1BC" },
+  { label: 'Neutral', ref: 'neutral', icon: 'far fa-meh', color: "#87BFBA" },
+  { label: 'Happy', ref: 'happy', icon: 'far fa-grin', color: "#F3C677" },
+  { label: 'Very Happy', ref: 'very_happy', icon: 'far fa-grin-beam', color: "#F28C8C" }
+])
 const userStore = useUserStore()
 const selectedRange = ref("7_days")
 const moodsInRange = ref([])
@@ -177,5 +192,30 @@ onMounted(loadMoodTrends)
   justify-content: center;
   padding-top: 1rem;
   padding-bottom: .5rem;
+}
+
+.mood_trends_items {
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.mood_trend_explained_holder {
+  width: 18%;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+}
+
+.mood_trend_color {
+  width: 1rem;
+  height: 1rem;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
 }
 </style>
