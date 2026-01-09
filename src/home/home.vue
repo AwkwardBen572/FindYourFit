@@ -75,11 +75,11 @@ const featureList = computed(() => [
 ])
 
 const offerList = computed(() => [
-  {
-    label: 'Expert support at your fingertips',
-    content: 'Find and connect with qualified therapists specializing in various areas.',
-    icon: therapistImg2
-  },
+  // {
+  //   label: 'Expert support at your fingertips',
+  //   content: 'Find and connect with qualified therapists specializing in various areas.',
+  //   icon: therapistImg2
+  // },
   {
     label: 'Personalized mood tracking',
     content: 'Log your daily mood to visualize trends, identify triggers, and gain insights.',

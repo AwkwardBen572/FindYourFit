@@ -30,7 +30,7 @@
     </div>
 
     <div class="profile_stats">
-      <div class="profile_stat_card" v-for="(item, index) in stats" :key="index">
+      <div class="profile_stat_card" v-for="(item, index) in stats" :key="index" @click="openWidget(item)">
         <div class="profile_stat_top inter font_size_xs">
           <div class="profile_stat_value" v-if="item.label === 'Mood Trends'">
             <div v-if="mood">
@@ -76,6 +76,7 @@ import gingerWoman from '@/assets/avatars/ginger_woman.png'
 import blackWoman from '@/assets/avatars/black_woman.png'
 import none from '@/assets/avatars/none.png'
 
+const emit = defineEmits(['setPage'])
 const router = useRouter()
 const userStore = useUserStore()
 const mood = ref(false)
@@ -103,7 +104,7 @@ const avatarSrc = computed(() => {
 const userName = computed(() => userStore.userData?.personalInfo.name || '')
 const userEmail = computed(() => userStore.userData?.personalInfo.email || '')
 const userStreak = computed(() => userStore.userData?.streak?.count || 0)
-const journalEntries = computed(() => userStore.journalData.length || 0)
+const journalEntries = computed(() => userStore.journalData && userStore.journalData.length || 0)
 
 const moods = computed(() => [
   { label: 'Very Sad', ref: 'very_sad', icon: 'far fa-sad-tear' },
@@ -145,6 +146,12 @@ const editProfileAvatar = () => { avatarProfileBool.value = true }
 
 const handleImageUpload = (event) => {
   console.log('Image selected:', event.target.files[0])
+}
+
+const openWidget = (item) => {
+  if(item.label == "Mood Trends") {
+    emit('setPage', 'moodTrends')
+  }
 }
 </script>
 

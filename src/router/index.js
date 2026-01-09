@@ -4,6 +4,7 @@ import LoginPage from '../login_register/loginRegister.vue'
 import HomePage from '../home/home.vue'
 import LoadingPage from '../loading/loadingPage.vue'
 import ProfilePage from '../profile/profile.vue'
+import MoodTrends from '../mood/moodTrends.vue'
 import JournalEntryPage from '../journal/journal.vue'
 import NavigationWidget from '../navigation/navigation.vue'
 
@@ -39,6 +40,12 @@ const routes = [
     path: '/journal/',
     name: 'JournalEntry',
     component: JournalEntryPage,
+    props: true
+  },
+  {
+    path: '/mood/',
+    name: 'MoodTrends',
+    component: MoodTrends,
     props: true
   }
 ]

@@ -23,10 +23,12 @@
     </div>
 
     <div class="influence_holder">
-      <div class="influence_heading_holder inter font_size_xs"><b>Optional Notes</b></div>
-      <textarea placeholder="Write a few words about why you feel the way you feel"
-        style="width: 90%; height: 60%; padding:0.5rem; border: 0.1rem solid #87bfba; border-radius: 1rem;"
-        class="inter font_size_xs" v-model="optionalNotes"></textarea>
+      <div style="width: 100%; height: 15rem; display: flex; flex-flow: column nowrap; align-items: center; justify-content: center;">
+        <div class="influence_heading_holder inter font_size_xs"><b>Optional Notes</b></div>
+        <textarea placeholder="Write a few words about why you feel the way you feel"
+          style="width: 90%; height: 60%; padding:0.5rem; border: 0.1rem solid #87bfba; border-radius: 1rem;"
+          class="inter font_size_xs" v-model="optionalNotes"></textarea>
+      </div>
     </div>
 
     <div class="save_button inter font_size_xxs" @click="saveMood()">Save</div>

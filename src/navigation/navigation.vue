@@ -1,9 +1,10 @@
 <template>
-  <profile v-if="currentPage === 'profile'"></profile>
+  <profile v-if="currentPage === 'profile'" @setPage="setPage"></profile>
   <home v-else-if="currentPage === 'home'" @setPage="setPage"></home>
   <mood v-else-if="currentPage === 'mood'"></mood>
   <journal-entry v-else-if="currentPage === 'journal'"></journal-entry>
   <therapists v-else-if="currentPage === 'therapists'"></therapists>
+  <mood-trends v-else-if="currentPage === 'moodTrends'"></mood-trends>
 
   <div class="navigation_bar_holder">
     <div class="navigation_item_holder inter font_size_xxs" v-for="(item, key) in navigationItems" :key="key">
@@ -23,6 +24,7 @@ import Home from '../home/home.vue'
 import Mood from '../mood/mood.vue'
 import JournalEntry from '../journal/journal.vue'
 import Therapists from '../therapists/therapists.vue'
+import MoodTrends from '../mood/moodTrends.vue'
 
 const navigationItems = {
   home: { name: 'Home', icon: '<i class="fa fa-home"></i>' },
