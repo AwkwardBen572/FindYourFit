@@ -225,6 +225,7 @@ const saveJournal = async () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding-bottom: 5rem;
 }
 
 .journal_list_item {

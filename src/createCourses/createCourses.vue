@@ -19,7 +19,7 @@
 
                     <div class="inter course_selection_holder">
                         <select class="course_input inter font_size_xs" v-model="selectedOption">
-                            <option disabled value="">Please select a course tag</option>
+                            <option disabled value="">Please select a course theme</option>
                             <option v-for="option in options" :key="option.value" :value="option.value">
                                 {{ option.text }}
                             </option>
@@ -111,7 +111,8 @@ const saveCourse = async () => {
             summary: courseSummary.value,
             days: days.value,
             content: courseDays.value,
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            courseTheme: selectedOption.value
         })
 
         courseName.value = ''
