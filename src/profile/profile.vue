@@ -79,6 +79,7 @@ import none from '@/assets/avatars/none.png'
 const emit = defineEmits(['setPage'])
 const router = useRouter()
 const userStore = useUserStore()
+userStore.fetchUserData()
 const mood = ref(false)
 const editProfileBool = ref(false)
 const avatarProfileBool = ref(false)
@@ -104,6 +105,7 @@ const avatarSrc = computed(() => {
 const userName = computed(() => userStore.userData?.personalInfo.name || '')
 const userEmail = computed(() => userStore.userData?.personalInfo.email || '')
 const userStreak = computed(() => userStore.userData?.streak?.count || 0)
+const userSubscriptionPlan = computed(() => userStore.userData?.subscription || "Free")
 const journalEntries = computed(() => userStore.journalData && userStore.journalData.length || 0)
 
 const moods = computed(() => [
@@ -118,6 +120,7 @@ const stats = ref([
   { label: 'App Streak', value: userStreak.value, icon: 'fa fa-signal' },
   { label: 'Journal Entries', value: journalEntries.value, icon: 'fa fa-book' },
   { label: 'Mood Overview', value: '', icon: 'fas fa-chart-line' },
+  { label: 'Subscription', value: userSubscriptionPlan, icon: 'fas fa-money-bill-wave' },
 ])
 
 onMounted(() => {
@@ -149,8 +152,11 @@ const handleImageUpload = (event) => {
 }
 
 const openWidget = (item) => {
+  console.log(item)
   if(item.label == "Mood Overview") {
     emit('setPage', 'moodTrends')
+  }else if(item.label === "Journal Entries") {
+    emit('setPage', 'journal')
   }
 }
 </script>

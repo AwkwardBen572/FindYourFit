@@ -165,3 +165,107 @@ const handleErrorModalClose = () => {
   errorMessage.value = ''
 }
 </script>
+
+<style scoped>
+.modal_overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+}
+
+.modal_holder {
+  width: 90%;
+  max-width: 400px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #000;
+}
+
+.modal_heading_holder {
+  width: 100%;
+  padding: 0.3rem;
+  background-color: #87bfba;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  color: #fff;
+}
+
+.modal_close_button {
+  width: 10%;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #fff;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.modal_content_holder {
+  width: 80%;
+  padding: 1rem;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal_content_description {
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.modal_form_holder {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.modal_input {
+  width: 90%;
+  height: 2rem;
+  border: 1px solid #ccc;
+  border-radius: 0.4rem;
+  outline: none;
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+  appearance: none;
+  background-color: #fff;
+}
+
+select.modal_input {
+  padding-right: 1.5rem;
+  color: #797979;
+}
+
+.modal_button {
+  width: 80%;
+  height: 2.5rem;
+  margin-top: 1rem;
+  background-color: #87bfba;
+  border: none;
+  border-radius: 0.5rem;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.modal_button:hover {
+  background-color: #6ea09a;
+}
+</style>

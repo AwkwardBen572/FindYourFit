@@ -35,9 +35,9 @@
                 </div>
             </div>
 
-            <div class="login_page_social_login">
+            <!-- <div class="login_page_social_login">
                 <div class="login_page_social_button" @click="handleGoogleLogin"></div>
-            </div>
+            </div> -->
 
             <div class="login_page_toggle_register inter font_size_xs">
                 <u @click="togglePageRef">{{ pageRef === 'login' ? 'Register' : 'Login' }}</u>
@@ -139,7 +139,6 @@ const handleGoogleLogin = async () => {
         }
         router.push({ name: 'Navigation' })
     } catch (err) {
-        console.log(err.message)
         errorMessage.value = 'Google login failed!'
         error.value = true
     }
@@ -159,9 +158,9 @@ const handleLogin = async () => {
         if (pageRef.value === 'register') {
             const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value)
             const user = userCredential.user
-            try {
-                await linkWithPopup(user, googleProvider)
-            } catch (e) { }
+            // try {
+            //     await linkWithPopup(user, googleProvider)
+            // } catch (e) { }
             globalUser.value = { uid: user.uid, email: user.email }
             register.value = true
         } else {
@@ -174,6 +173,7 @@ const handleLogin = async () => {
                 if (userData) {
                     await updateStreak(userData)
                     userStore.setUserData(userData)
+
                     router.push({ name: 'Navigation' })
                 }
             }

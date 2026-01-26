@@ -5,6 +5,8 @@
   <journal-entry v-else-if="currentPage === 'journal'"></journal-entry>
   <therapists v-else-if="currentPage === 'therapists'"></therapists>
   <mood-trends v-else-if="currentPage === 'moodTrends'"></mood-trends>
+  <courses v-else-if="currentPage === 'courses'" @setPage="setPage"></courses>
+  <courses-create v-else-if="currentPage === 'createCourses'" @setPage="setPage"></courses-create>
 
   <div class="navigation_bar_holder">
     <div class="navigation_item_holder inter font_size_xxs" v-for="(item, key) in navigationItems" :key="key">
@@ -23,12 +25,16 @@ import Profile from '../profile/profile.vue'
 import Home from '../home/home.vue'
 import Mood from '../mood/mood.vue'
 import JournalEntry from '../journal/journal.vue'
+import Courses from '../courses/coursesPage.vue'
+import CoursesCreate from '../createCourses/createCourses.vue'
 import Therapists from '../therapists/therapists.vue'
 import MoodTrends from '../mood/moodTrends.vue'
 
 const navigationItems = {
   home: { name: 'Home', icon: '<i class="fa fa-home"></i>' },
   journal: { name: 'Journal', icon: '<i class="fa fa-book"></i>' },
+  therapists: { name: 'Therapists', icon: '<i class="fa fa-address-book"></i>' },
+  courses: { name: 'Courses', icon: '<i class="fas fa-graduation-cap"></i>' },
   profile: { name: 'Profile', icon: '<i class="fa fa-id-card"></i>' }
 }
 

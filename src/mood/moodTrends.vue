@@ -4,7 +4,7 @@
       My Mood Overview
     </div>
     <br>
-    <div class="mood_trends_timerange_holder">
+    <div class="mood_trends_timerange_holder" v-if="moodsInRange.length > 0">
       <div v-for="timeItem in timeItems" :key="timeItem.key" class="mood_trends_timerange inter font_size_xxs"
         :class="{ mood_trends_timerange_selected: selectedRange === timeItem.key }"
         @click="selectedRange = timeItem.key">
@@ -13,17 +13,18 @@
     </div>
     <br>
     <br>
-    <div class="mood_trends_graph_holder">
+    <div class="mood_trends_graph_holder" v-if="moodsInRange.length > 0">
       <canvas id="moodPieChart" width="400" height="300"></canvas>
     </div>
     <br>
-    <div class="mood_trends_items">
+    <div class="mood_trends_items"  v-if="moodsInRange.length > 0">
       <div class="mood_trend_explained_holder"  v-for="mood in moods">
         <div class="mood_trend_color" :style="{ backgroundColor: mood.color }"></div>
         &emsp;
         <i :class="mood.icon" style="font-size:1.4rem;" :style="{color: mood.color}"></i>&nbsp;
       </div>
     </div>
+    <div v-if="moodsInRange.length === 0" class="inter font_size_xs">You have not logged any moods as of yet.</div>
   </div>
 </template>
 

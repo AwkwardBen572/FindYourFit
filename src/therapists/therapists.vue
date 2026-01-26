@@ -1,49 +1,41 @@
 <template>
-  <div class="empty_therapy_list inter font_size_xs"
-    v-if="signUpStep === 'home_list' && verifiedTherapistList.length === 0 && unverifiedTherapistList.length >= 0">
+  <div class="empty_therapy_list inter font_size_xs" v-if="
+    signUpStep === 'home_list' &&
+    verifiedTherapistList.length === 0 &&
+    unverifiedTherapistList.length === 0
+  ">
+    <br>
     No therapists are listed at this moment.
   </div>
 
   <div class="therapy_sign_up" v-else>
-    <!-- <div class="logo_holder">
-      <div class="logo"></div>
-      <div class="inter font_size_xs">
-        &emsp;<b style="color:#87bfba">FindingYourFit</b>&emsp;
-      </div>
-      <div class="logo"></div>
-    </div> -->
-
     <div class="therapy_sign_up_step_1" v-if="signUpStep === 'step_1'">
       <div class="therapy_sign_up_heading inter font_size_xs">
+        <br>
         <b>Let's get you signed up and listed!</b>
+        <br><br>
       </div>
-      <br />
 
       <form class="therapist_sign_up_form_holder">
         <input class="form_input inter font_size_xs" type="text" placeholder="Email Address" v-model="email" />
+        <input class="form_input inter font_size_xs" type="text" placeholder="Contact Number" v-model="contactNumber" />
         <input class="form_input inter font_size_xs" type="text" placeholder="Username" v-model="username" />
 
         <select class="form_input inter font_size_xs" v-model="selectedTitle">
           <option disabled value="">Select your title</option>
-          <option v-for="t in title" :key="t.value" :value="t.value">
-            {{ t.text }}
-          </option>
+          <option v-for="t in title" :key="t.value" :value="t.value">{{ t.text }}</option>
         </select>
 
         <input class="form_input inter font_size_xs" type="text" placeholder="Name & Surname" v-model="nameSurname" />
 
         <select class="form_input inter font_size_xs" v-model="selectedAcademicTitle">
           <option disabled value="">Select your academic title</option>
-          <option v-for="a in academicTitle" :key="a.value" :value="a.value">
-            {{ a.text }}
-          </option>
+          <option v-for="a in academicTitle" :key="a.value" :value="a.value">{{ a.text }}</option>
         </select>
 
         <select class="form_input inter font_size_xs" v-model="selectedCredential">
           <option disabled value="">Select your credential</option>
-          <option v-for="c in credentialOptions" :key="c.value" :value="c.value">
-            {{ c.text }}
-          </option>
+          <option v-for="c in credentialOptions" :key="c.value" :value="c.value">{{ c.text }}</option>
         </select>
 
         <input ref="addressInput" class="form_input inter font_size_xs" type="text" placeholder="Search address" />
@@ -52,16 +44,20 @@
       <button class="form_button inter font_size_xs" @click="addTherapist">
         Confirm
       </button>
+
+      <div class="sign_up_button_holder inter font_size_s">
+        <i class="fas fa-times" @click="cancelSignUp"></i>
+      </div>
     </div>
 
-    <div style="width: 100%; height: 100%;" v-else-if="signUpStep === 'verify_therapist'">
-      <div v-if="unverifiedTherapistList.length">
+    <div style="width: 100%;" v-else-if="signUpStep === 'verify_therapist' && isAdmin">
+      <div style="width: 100%;" v-if="unverifiedTherapistList.length">
         <div class="therapist_items_holder inter font_size_xs" v-for="therapist in unverifiedTherapistList"
-          :key="therapist.userName">
+          :key="therapist.id">
           <div class="therapist_item_holder">
             <b>{{ therapist.nameSurname }}</b><br />
             {{ therapist.email }}<br />
-            {{ therapist.credential }}<br />
+            {{ capitalize(therapist.credential) }}<br />
             {{ therapist.address.city }}, {{ therapist.address.province }}
 
             <div class="contact_buttons_holder">
@@ -77,185 +73,130 @@
       </div>
 
       <div class="empty_therapy_list inter font_size_xs" v-else>
-        <div>No therapists need verifying at this moment.</div>
-        <div class="sign_up_button_holder inter font_size_s">
-          <i class="far fa-address-book" @click="therapistHomeList"></i>
-        </div>
+        <br>
+        No therapists need verifying at this moment.
+      </div>
+      <div class="sign_up_button_holder inter font_size_s">
+        <i class="fas fa-times" @click="cancelSignUp"></i>
       </div>
     </div>
 
-    <div v-else-if="signUpStep === 'home_list' && verifiedTherapistList.length" style="width: 100%; height: 100%;">
-      <div class="therapist_items_holder inter font_size_xs" v-for="therapist in verifiedTherapistList"
-        :key="therapist.userName">
-        <div class="therapist_item_holder">
-          <b>{{ therapist.nameSurname }}</b><br />
-          {{ capitalize(therapist.credential) }}<br />
-          {{ therapist.address.city }}, {{ therapist.address.province }}
+    <div style="width: 100%;" v-else-if="signUpStep === 'home_list'">
+      <div class="search_therapists_holder">
+        <div class="search_input_holder">
+          <input class="search_input inter font_size_xs" type="text" placeholder="Search Therapist" v-model="search">
+          <div class="search_button_holder" @click="searchTherapist()">
+            <i class="fa fa-search"></i>
+          </div>
+        </div>
+
+        <div v-if="filteredTherapists.length === 0" class="empty_therapy_list inter font_size_xs">
+          <br>
+          No verified therapists available yet.
+        </div>
+
+        <div v-else class="therapist_items_holder inter font_size_xs" v-for="therapist in filteredTherapists"
+          :key="therapist.id">
+          <div class="therapist_item_holder">
+            <b>{{ therapist.nameSurname }}</b><br />
+            {{ capitalize(therapist.credential) }}<br />
+            {{ therapist.address.city }}, {{ therapist.address.province }}
+            <br>
+            <br>
+            <div style="display: flex; flex-flow: row nowrap;">
+              <div
+                style="width: 3rem;height: 1.5rem; background-color: #87bfba; color: white; display: flex; flex-flow: row nowrap; justify-content: center; align-items: center; border-radius: 1rem;"
+                @click="phoneTherapist(therapist)"><i class="fa fa-phone"></i></div>
+              &emsp;
+              <div
+                style="width: 3rem;height: 1.5rem; background-color: #87bfba; color: white; display: flex; flex-flow: row nowrap; justify-content: center; align-items: center; border-radius: 1rem;"
+                @click="emailTherapist(therapist)"><i class="fa fa-envelope"></i></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+    <errorModal v-if="error" :errorMessage="errorMessage" @close="error = false" />
   </div>
 
   <div class="sign_up_button_holder inter font_size_s" v-if="signUpStep === 'home_list'">
-    <i class="fas fa-plus" @click="signUpAsTherapist"></i>
-  </div>
+      <i class="fas fa-plus" @click="signUpAsTherapist"></i>
+    </div>
 
-  <div class="verify_therapists_holder inter font_size_s" v-if="signUpStep === 'home_list' && isAdmin === 1">
-    <i class="fas fa-award" @click="verifyTherapists"></i>
-  </div>
-
-  <errorModal v-if="error" :errorMessage="errorMessage" @close="error = false" />
+    <div class="verify_therapists_holder inter font_size_s" v-if="signUpStep === 'home_list' && isAdmin">
+      <i class="fas fa-award" @click="verifyTherapists"></i>
+    </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useUserStore } from '@/data/userStore'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
-import { db } from '../firebase.js'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { db } from '../firebase'
 import errorModal from '../modals/errorModal.vue'
 
 const userStore = useUserStore()
 
-const STORAGE_KEY = 'therapist_signup_state'
+userStore.getTherapists()
 
+const search = ref("")
 const email = ref(userStore.userData.personalInfo.email)
+const contactNumber = ref(userStore.userData.personalInfo.contactNumber)
 const nameSurname = ref(userStore.userData.personalInfo.name)
 const username = ref('')
-const isAdmin = ref(userStore.userData.admin || 0)
-
-const signUpStep = ref('home_list')
-
-const verifiedTherapistList = ref([])
-const unverifiedTherapistList = ref([])
-
 const selectedTitle = ref('')
 const selectedAcademicTitle = ref('')
 const selectedCredential = ref('')
-
 const selectedAddress = ref(null)
 const addressInput = ref(null)
 
+const signUpStep = ref('home_list')
+const isAdmin = ref(Boolean(userStore.userData.admin))
 const error = ref(false)
 const errorMessage = ref('')
 
-const title = ref([
+const title = [
   { value: 'dr', text: 'Dr.' },
   { value: 'mr', text: 'Mr.' },
   { value: 'mrs', text: 'Mrs.' },
   { value: 'miss', text: 'Miss.' },
   { value: 'ms', text: 'Ms.' }
-])
+]
 
-const academicTitle = ref([
+const academicTitle = [
   { value: 'phd', text: 'PhD' },
   { value: 'msc', text: 'MSc' },
   { value: 'ma', text: 'MA' }
-])
+]
 
-const credentialOptions = ref([
+const credentialOptions = [
   { value: 'psychologist', text: 'Psychologist' },
   { value: 'psychiatrist', text: 'Psychiatrist' },
   { value: 'social_worker', text: 'Social Worker' }
-])
+]
 
-function capitalize(value) {
-  if (!value) return ''
-  return (value.charAt(0).toUpperCase() + value.slice(1)).replace('_', ' ')
-}
+const capitalize = value => value ? value.replace('_', ' ').replace(/^./, c => c.toUpperCase()) : ''
 
-function loadGoogleMaps() {
-  return new Promise((resolve, reject) => {
-    if (window.google?.maps?.places) {
-      resolve()
-      return
-    }
+const verifiedTherapistList = computed(() => (userStore.therapists || []).filter(t => t.isVerified))
+const unverifiedTherapistList = computed(() => (userStore.therapists || []).filter(t => !t.isVerified))
 
-    const script = document.createElement('script')
-    script.src =
-      'https://maps.googleapis.com/maps/api/js?key=AIzaSyBWGRHjfWWoBWojyOBuGi75ACgNAkGobws&libraries=places'
-    script.async = true
-    script.defer = true
-    script.onload = resolve
-    script.onerror = reject
-    document.head.appendChild(script)
-  })
-}
+const filteredTherapists = computed(() => {
+  if (!search.value) return verifiedTherapistList.value
+  const term = search.value.toLowerCase()
+  return verifiedTherapistList.value.filter(t =>
+    t.nameSurname.toLowerCase().includes(term)
+  )
+})
 
-onMounted(() => {
-  verifiedTherapistList.value = []
-  unverifiedTherapistList.value = []
-
-  userStore.therapists?.forEach(t => {
-    t.isVerified
-      ? verifiedTherapistList.value.push(t)
-      : unverifiedTherapistList.value.push(t)
-  })
-
-  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
-  if (saved) {
-    signUpStep.value = saved.signUpStep || 'home_list'
-    username.value = saved.username || ''
-    selectedTitle.value = saved.selectedTitle || ''
-    selectedAcademicTitle.value = saved.selectedAcademicTitle || ''
-    selectedCredential.value = saved.selectedCredential || ''
-    selectedAddress.value = saved.selectedAddress || null
+watch(unverifiedTherapistList, list => {
+  if (signUpStep.value === 'verify_therapist' && list.length === 0) {
+    signUpStep.value = 'home_list'
   }
 })
 
-watch(
-  [
-    signUpStep,
-    username,
-    selectedTitle,
-    selectedAcademicTitle,
-    selectedCredential,
-    selectedAddress
-  ],
-  () => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        signUpStep: signUpStep.value,
-        username: username.value,
-        selectedTitle: selectedTitle.value,
-        selectedAcademicTitle: selectedAcademicTitle.value,
-        selectedCredential: selectedCredential.value,
-        selectedAddress: selectedAddress.value
-      })
-    )
-  },
-  { deep: true }
-)
-
-watch(signUpStep, async step => {
-  if (step !== 'step_1') return
-
-  await nextTick()
-  await loadGoogleMaps()
-  if (!addressInput.value) return
-
-  const autocomplete = new google.maps.places.Autocomplete(addressInput.value, {
-    types: ['address'],
-    componentRestrictions: { country: 'za' }
-  })
-
-  autocomplete.addListener('place_changed', () => {
-    const place = autocomplete.getPlace()
-    selectedAddress.value = {
-      city:
-        place.address_components?.find(c => c.types.includes('locality'))?.long_name ||
-        '',
-      province:
-        place.address_components?.find(c =>
-          c.types.includes('administrative_area_level_1')
-        )?.long_name || ''
-    }
-  })
-})
-
-const signUpAsTherapist = () => (signUpStep.value = 'step_1')
-const verifyTherapists = () => (signUpStep.value = 'verify_therapist')
-const therapistHomeList = () => (signUpStep.value = 'home_list')
+const signUpAsTherapist = () => signUpStep.value = 'step_1'
+const verifyTherapists = () => signUpStep.value = 'verify_therapist'
+const cancelSignUp = () => signUpStep.value = 'home_list'
 
 const addTherapist = async () => {
   if (!selectedAddress.value) {
@@ -265,9 +206,9 @@ const addTherapist = async () => {
   }
 
   const therapistRef = doc(db, 'therapists', userStore.userData.uid)
-  const therapistSnap = await getDoc(therapistRef)
+  const snap = await getDoc(therapistRef)
 
-  if (therapistSnap.exists()) {
+  if (snap.exists()) {
     errorMessage.value = 'You are already registered as a therapist.'
     error.value = true
     return
@@ -285,34 +226,81 @@ const addTherapist = async () => {
     createdAt: new Date()
   })
 
-  localStorage.removeItem(STORAGE_KEY)
-
   errorMessage.value = 'Thank you. You will be redirected shortly.'
   error.value = true
 
-  setTimeout(() => {
-    window.location.href =
-      'https://docs.google.com/forms/d/e/1FAIpQLSe2kKgs6Qnvl1uNfVSVEjUeCRmM8jv6E6O-6xhy-1mIiAYvLg/viewform'
-  }, 8000)
+  //  setTimeout(() => {
+  //   window.location.href =
+  //     'https://docs.google.com/forms/d/e/1FAIpQLSe2kKgs6Qnvl1uNfVSVEjUeCRmM8jv6E6O-6xhy-1mIiAYvLg/viewform'
+  // }, 8000)
 }
 
 const acceptTherapist = async therapist => {
-  await setDoc(
-    doc(db, 'therapists', therapist.id),
-    { isVerified: true },
-    { merge: true }
+  await setDoc(doc(db, 'therapists', therapist.id), { isVerified: true }, { merge: true })
+  signUpStep.value = 'home_list'
+  userStore.getTherapists()
+
+  // window.location.reload()
+}
+
+const declineTherapist = therapist =>
+  setDoc(doc(db, 'therapists', therapist.id), { declined: true }, { merge: true })
+
+const loadGoogleMaps = () =>
+  new Promise(resolve => {
+    if (window.google?.maps?.places) return resolve()
+    const script = document.createElement('script')
+    script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBWGRHjfWWoBWojyOBuGi75ACgNAkGobws&libraries=places'
+    script.onload = resolve
+    document.head.appendChild(script)
+  })
+
+watch(signUpStep, async step => {
+  if (step !== 'step_1') return
+  await nextTick()
+  await loadGoogleMaps()
+  const autocomplete = new google.maps.places.Autocomplete(addressInput.value, {
+    types: ['address'],
+    componentRestrictions: { country: 'za' }
+  })
+  autocomplete.addListener('place_changed', () => {
+    const place = autocomplete.getPlace()
+    selectedAddress.value = {
+      city: place.address_components?.find(c => c.types.includes('locality'))?.long_name || '',
+      province: place.address_components?.find(c => c.types.includes('administrative_area_level_1'))?.long_name || ''
+    }
+  })
+})
+
+// Optional: separate search button for server-side search
+const searchTherapist = async (term) => {
+  if (!term) return []
+
+  const lowerTerm = term.toLowerCase()
+  const q = query(
+    collection(db, "therapists"),
+    where("isVerified", "==", true),
+    where("searchIndex", "array-contains", lowerTerm)
   )
 
-  unverifiedTherapistList.value =
-    unverifiedTherapistList.value.filter(t => t.id !== therapist.id)
+  const querySnapshot = await getDocs(q)
+  const results = []
+  querySnapshot.forEach(docSnap => results.push({ id: docSnap.id, ...docSnap.data() }))
+  return results
 
-  verifiedTherapistList.value.push(therapist)
 }
 
-const declineTherapist = therapist => {
-  unverifiedTherapistList.value =
-    unverifiedTherapistList.value.filter(t => t.id !== therapist.id)
+const phoneTherapist = (therapist) => {
+  console.log(therapist.contactNumber)
+  window.location.href = `tel:${therapist.contactNumber}`;
 }
+
+const emailTherapist = (therapist) => {
+  const subject = encodeURIComponent('Therapy Session Enquiry');
+
+  window.location.href = `mailto:${therapist.email}?subject=${subject}`;
+}
+
 </script>
 
 <style scoped>
@@ -322,6 +310,7 @@ const declineTherapist = therapist => {
   display: flex;
   justify-content: center;
   align-items: center;
+  text-align: center;
 }
 
 .sign_up_button_holder {
@@ -432,7 +421,7 @@ select.form_input {
 }
 
 .therapist_item_holder {
-  width: 80%;
+  width: 88%;
   border-radius: 2rem;
   box-shadow: 0.1rem 0.1rem 1rem 0.2rem rgba(135, 191, 186, 0.4);
   padding: 1rem;
@@ -454,5 +443,48 @@ select.form_input {
   border-radius: 5rem;
   background-color: #87bfba;
   margin-right: 3rem;
+}
+
+.search_therapists_holder {
+  margin-top: 1rem;
+  width: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.search_input_holder {
+  width: 100%;
+  height: 3rem;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.search_button_holder {
+  width: 15%;
+  height: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1rem;
+  background-color: rgb(135, 191, 186);
+  color: #ffffff;
+}
+
+.search_input {
+  width: 80%;
+  max-width: 400px;
+  height: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 0.4rem;
+  outline: none;
+  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
 }
 </style>

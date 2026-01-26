@@ -24,8 +24,8 @@
     <errorModal v-if="journalSaved" :errorMessage="journalMessage" @close="handleErrorModalClose" />
   </div>
   <div v-else>
-    <div class="journal_list_holder" v-if="userStore.journalData">
-      <div v-for="(entry, date) in userStore.journalData" :key="date" class="journal_list_item inter">
+    <div class="journal_list_holder">
+      <div v-for="(entry, date) in userStore.journalData" :key="date" class="journal_list_item inter"  v-if="userStore.journalData">
         <div class="journal_list_heading inter font_size_sm">
           {{ entry.journalEntryHeading }}
         </div>
@@ -36,6 +36,7 @@
           Logged on: {{ new Date(entry.journalEntryLogged.seconds * 1000).toLocaleString() }}
         </div>
       </div>
+      <div class="inter font_size_sm" v-else>You don't have any journals logged as of yet.</div>
     </div>
   </div>
 </template>
@@ -50,6 +51,7 @@ import errorModal from '../modals/errorModal.vue'
 const emit = defineEmits(['close'])
 
 const userStore = useUserStore()
+userStore.getJournalEntries()
 const selectedJournalItem = ref('journalEntry')
 const journalItems = [
   { key: 'journalEntry', label: 'New Journal Entry', cornerClass: 'right-rounded' },
@@ -68,6 +70,7 @@ const setJournalItem = (item) => {
   selectedJournalItem.value = item
   journalEntryDate.value = new Date().toDateString()
   journalEntryTime.value = new Date().toLocaleTimeString()
+  userStore.getJournalEntries()
 }
 
 const handleErrorModalClose = () => {
@@ -172,6 +175,7 @@ const saveJournal = async () => {
   justify-content: center;
   align-items: center;
   color: #808080;
+  text-align: center;
   width: 100%;
   height: 20%;
 }

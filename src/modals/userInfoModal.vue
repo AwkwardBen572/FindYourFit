@@ -120,7 +120,8 @@ const registerUserInfo = async () => {
 
     await setDoc(doc(db, 'users', props.globalUser.uid), user)
     userStore.setUserData(user)
-    router.push({ name: 'Navigation' })
+    window.location.reload();
+    // router.push({ name: 'Navigation' })
 }
 
 const handleErrorModalClose = () => {
