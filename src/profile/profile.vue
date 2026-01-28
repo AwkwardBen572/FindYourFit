@@ -152,11 +152,11 @@ const handleImageUpload = (event) => {
 }
 
 const openWidget = (item) => {
-  console.log(item)
   if(item.label == "Mood Overview") {
-    emit('setPage', 'moodTrends')
+    router.push({ name: 'MoodTrends' })
   }else if(item.label === "Journal Entries") {
-    emit('setPage', 'journal')
+    router.push({ name: 'Journal' })
+
   }
 }
 </script>

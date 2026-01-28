@@ -3,13 +3,15 @@ import { useUserStore } from '@/data/userStore'
 import LoginPage from '../login_register/loginRegister.vue'
 import HomePage from '../home/home.vue'
 import CoursesPage from '../courses/coursesPage.vue'
-import CreateCoursesPage from '../createCourses/createCourses.vue'
+import CreateCoursesPage from '../courses/createCourses.vue'
+import DoCourse from '../courses/doCourse.vue'
 import AppStreak from '../appStreak/appStreak.vue'
 import LoadingPage from '../loading/loadingPage.vue'
 import ProfilePage from '../profile/profile.vue'
 import MoodTrends from '../mood/moodTrends.vue'
+import Mood from '../mood/mood.vue'
 import JournalEntryPage from '../journal/journal.vue'
-import NavigationWidget from '../navigation/navigation.vue'
+import TherapistPage from '../therapists/therapists.vue'
 
 const routes = [
   {
@@ -17,15 +19,10 @@ const routes = [
     name: 'Loading',
     component: LoadingPage
   }
-  ,{
+  , {
     path: '/login',
     name: 'Login',
     component: LoginPage
-  },
-  {
-    path: '/navigation',
-    name: 'Navigation',
-    component: NavigationWidget
   },
   {
     path: '/home/',
@@ -41,7 +38,7 @@ const routes = [
   },
   {
     path: '/journal/',
-    name: 'JournalEntry',
+    name: 'Journal',
     component: JournalEntryPage,
     props: true
   },
@@ -49,6 +46,12 @@ const routes = [
     path: '/mood/',
     name: 'MoodTrends',
     component: MoodTrends,
+    props: true
+  },
+  {
+    path: '/mood/',
+    name: 'Mood',
+    component: Mood,
     props: true
   },
   {
@@ -67,6 +70,24 @@ const routes = [
     path: '/createCourses/',
     name: 'CreateCourses',
     component: CreateCoursesPage,
+    props: true
+  },
+  {
+    path: '/courses/:id',
+    name: 'DoCourse',
+    component: DoCourse,
+    props: true
+  },
+  {
+    path: '/courses/:id',
+    name: 'CourseView',
+    component: () => import('@/courses/viewCourse.vue'),
+    props: true
+  },
+  {
+    path: '/therapists/',
+    name: 'Therapists',
+    component: TherapistPage,
     props: true
   }
 ]

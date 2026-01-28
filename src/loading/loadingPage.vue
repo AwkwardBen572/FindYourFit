@@ -12,7 +12,7 @@ const router = useRouter()
 
 onMounted(() => {
     if (userStore.userData?.uid) {
-        router.push({ name: 'Navigation' })
+        router.push({ name: 'Home' })
     } else {
         router.push({ name: 'Login' })
     }

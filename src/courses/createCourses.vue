@@ -101,33 +101,43 @@ const generateDays = () => {
 generateDays()
 
 const saveCourse = async () => {
-    if (!courseName.value || !courseSummary.value) return
+    if (!courseName.value || !courseSummary.value || !selectedOption.value) return;
 
-    loading.value = true
+    loading.value = true;
 
     try {
         await addDoc(collection(db, 'courses'), {
             name: courseName.value,
             summary: courseSummary.value,
-            days: days.value,
-            content: courseDays.value,
-            createdAt: serverTimestamp(),
-            courseTheme: selectedOption.value
-        })
+            courseTheme: selectedOption.value,
+            numberOfDays: days.value,
+            days: courseDays.value.map(day => ({
+                title: day.title,
+                content: day.content,
+            })),
+            createdAt: serverTimestamp()
+        });
 
-        courseName.value = ''
-        courseSummary.value = ''
-        days.value = 1
-        generateDays()
+        courseName.value = '';
+        courseSummary.value = '';
+        days.value = 1;
+        selectedOption.value = '';
+        generateDays();
     } catch (e) {
-        console.error(e)
+        console.error(e);
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+
+    router.push({
+        name: 'Courses'
+    })
+};
 
 const cancelAddingCourse = (item) => {
-    emit('setPage', 'courses')
+    router.push({
+        name: 'Courses'
+    })
 }
 </script>
 

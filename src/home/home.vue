@@ -9,7 +9,7 @@
           <b>How are you feeling today?</b>
         </div>
         <div class="feeling_image"></div>
-        <div class="checkin_button inter font_size_xxs" @click="$emit('setPage', 'mood')">
+        <div class="checkin_button inter font_size_xxs" @click="setMood()">
           Check in now
         </div>
       </div>
@@ -54,7 +54,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '@/data/userStore'
 import { getRandomQuote } from '@/data/quotes.js'
-
+import { useRoute, useRouter } from 'vue-router'
 import therapistImg from '@/assets/my_therapist.png'
 import journalImg from '@/assets/my_journal.png'
 import journalImg2 from '@/assets/journal.png'
@@ -63,6 +63,7 @@ import therapistImg2 from '@/assets/therapist.png'
 import moodImg from '@/assets/mood_Track.png'
 
 const userStore = useUserStore()
+const router = useRouter()
 const dailyQuote = ref({ content: '', author: '' })
 const logMood = ref(false)
 
@@ -93,7 +94,6 @@ const offerList = computed(() => [
 ])
 
 onMounted(() => {
-  console.log("Home mounted")
   dailyQuote.value = getRandomQuote()
 })
 
@@ -102,6 +102,12 @@ const getTimeOfDay = () => {
   if (hour < 12) return 'morning'
   if (hour < 18) return 'afternoon'
   return 'evening'
+}
+
+const setMood = () => {
+    router.push({
+    name: 'Mood'
+  })
 }
 </script>
 

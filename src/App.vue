@@ -1,23 +1,11 @@
 <script setup>
-
-// import { onMounted, computed  } from 'vue'
-// import { useRouter } from 'vue-router'
-// import { useUserStore } from '@/data/userStore'
-
-// const router = useRouter()
-// const userStore = useUserStore()
-
-// onMounted(async () => {
-//   const userFetched = useUserStore()
-//   await userFetched.fetchUserData()
-//   router.replace('/loading')
-// })
-
+  import Navbar from '@/navigation/navigation.vue'
 </script>
 
 <template>
   <div class="app_holder">
     <router-view />
+    <Navbar />
   </div>
 </template>
 
